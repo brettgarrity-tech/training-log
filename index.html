@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Training Log</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1A2029">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Training Log">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  :root {
+    --ink: #1A2029;
+    --panel: #222A35;
+    --panel-2: #2A3441;
+    --line: #37424F;
+    --text: #E9E7E2;
+    --muted: #8E9AA8;
+    --gold: #E0A93B;
+    --gold-dim: #6b5322;
+    --down: #C4614F;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; background: var(--ink); }
+  body {
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 15px; line-height: 1.45; min-height: 100vh;
+    padding-bottom: calc(100px + env(safe-area-inset-bottom));
+    font-variant-numeric: tabular-nums;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 0 12px; }
+
+  .topbar {
+    position: sticky; top: 0; z-index: 30; background: var(--ink);
+    border-bottom: 1px solid var(--line);
+    padding: calc(10px + env(safe-area-inset-top)) 0 0;
+  }
+  .brandrow { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .brand { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
+  .brand span { color: var(--muted); font-weight: 500; font-size: 13px; }
+  .tools { display: flex; gap: 6px; }
+  .tools button {
+    background: none; border: 1px solid var(--line); color: var(--muted);
+    border-radius: 999px; padding: 4px 11px; font-size: 12.5px; cursor: pointer; font-family: inherit;
+  }
+  .tools button:hover { color: var(--text); border-color: var(--muted); }
+  .tabs { display: flex; gap: 4px; margin-top: 10px; overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex: 0 0 auto; background: none; border: none; color: var(--muted);
+    font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+    padding: 8px 12px 9px; border-bottom: 2px solid transparent; white-space: nowrap;
+  }
+  .tab[aria-selected="true"] { color: var(--text); border-bottom-color: var(--gold); }
+  .tab:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+  .meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 0 4px; flex-wrap: wrap; }
+  .meta-note { color: var(--muted); font-size: 13px; max-width: 42ch; }
+  .datefield { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--muted); }
+  .datefield input {
+    background: var(--panel); border: 1px solid var(--line); color: var(--text);
+    border-radius: 7px; padding: 5px 8px; font-family: inherit; font-size: 13px;
+  }
+
+  .group-label { display: flex; align-items: center; gap: 8px; margin: 20px 0 -4px; font-size: 12px; font-weight: 700; color: var(--gold); }
+  .group-label::after { content: ""; flex: 1; height: 1px; background: var(--gold-dim); }
+  .group { border-left: 2px solid var(--gold-dim); padding-left: 10px; margin-top: 10px; }
+
+  .ex { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; margin-top: 10px; }
+  .ex-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .ex-name { font-size: 15.5px; font-weight: 700; letter-spacing: -0.01em; }
+  .ex-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .chart-btn { flex: 0 0 auto; background: none; border: 1px solid var(--line); color: var(--muted); border-radius: 7px; padding: 3px 9px; font-size: 12px; cursor: pointer; font-family: inherit; }
+  .chart-btn:hover { color: var(--gold); border-color: var(--gold-dim); }
+  select.alt { background: var(--panel-2); border: 1px solid var(--line); color: var(--text); border-radius: 7px; padding: 4px 7px; font-size: 12.5px; font-family: inherit; margin-top: 7px; max-width: 100%; }
+
+  .sets { margin-top: 10px; display: grid; gap: 6px; }
+  .setrow { display: grid; grid-template-columns: 30px 58px 1fr 1fr 54px; gap: 6px; align-items: center; }
+  .setno { color: var(--muted); font-size: 12px; font-weight: 700; }
+  .target { color: var(--text); font-size: 13px; font-weight: 600; }
+  .setrow input {
+    width: 100%; background: var(--panel-2); border: 1px solid var(--line); color: var(--text);
+    border-radius: 8px; padding: 9px 8px; font-family: inherit; font-size: 16px;
+    font-variant-numeric: tabular-nums;
+  }
+  .setrow input:focus { outline: 2px solid var(--gold); outline-offset: -1px; border-color: transparent; }
+  .setrow input::placeholder { color: #5d6874; }
+  .rest { background: none; border: 1px solid var(--line); color: var(--muted); border-radius: 7px; padding: 7px 2px; font-size: 12px; cursor: pointer; font-family: inherit; }
+  .rest:hover { color: var(--gold); border-color: var(--gold-dim); }
+  .hdr { color: var(--muted); font-size: 11px; font-weight: 600; }
+
+  .lastline { margin-top: 9px; font-size: 12.5px; color: var(--muted); }
+  .lastline b { color: var(--text); font-weight: 600; }
+  .pr { color: var(--gold); font-weight: 700; }
+  .protocol { margin-top: 9px; font-size: 12.5px; color: var(--gold); border-top: 1px dashed var(--gold-dim); padding-top: 8px; }
+  .cue { margin-top: 8px; font-size: 12.5px; color: var(--muted); }
+
+  .field { margin-top: 12px; }
+  .field label { display: block; font-size: 12.5px; color: var(--muted); margin-bottom: 4px; }
+  .field input, .field select, .field textarea {
+    width: 100%; background: var(--panel-2); border: 1px solid var(--line); color: var(--text);
+    border-radius: 8px; padding: 9px 10px; font-family: inherit; font-size: 16px;
+  }
+  .field textarea { min-height: 70px; resize: vertical; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .finish {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+    background: linear-gradient(to top, var(--ink) 72%, transparent);
+    padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+    display: flex; justify-content: center;
+  }
+  .finish-inner { width: 100%; max-width: 616px; display: flex; gap: 8px; align-items: center; }
+  .save { flex: 1; background: var(--gold); color: #1A1305; border: none; border-radius: var(--radius); padding: 14px; font-size: 15px; font-weight: 700; font-family: inherit; cursor: pointer; }
+  .clearbtn { background: var(--panel); border: 1px solid var(--line); color: var(--muted); border-radius: var(--radius); padding: 14px 13px; font-family: inherit; font-size: 13px; cursor: pointer; }
+
+  .timer {
+    position: fixed; left: 12px; right: 12px; bottom: calc(84px + env(safe-area-inset-bottom));
+    z-index: 45; background: var(--panel-2); border: 1px solid var(--gold-dim);
+    border-radius: var(--radius); padding: 10px 12px; display: none; align-items: center; gap: 12px;
+    max-width: 616px; margin: 0 auto;
+  }
+  .timer.on { display: flex; }
+  .timer .t { font-size: 22px; font-weight: 700; color: var(--gold); min-width: 62px; }
+  .timer .lbl { flex: 1; font-size: 12.5px; color: var(--muted); }
+  .timer button { background: none; border: 1px solid var(--line); color: var(--muted); border-radius: 7px; padding: 5px 10px; font-family: inherit; font-size: 12.5px; cursor: pointer; }
+  .bar { height: 3px; background: var(--gold); border-radius: 2px; transition: width .3s linear; margin-top: 4px; }
+
+  .hist { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; margin-top: 10px; }
+  .hist-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; cursor: pointer; }
+  .hist-w { font-weight: 700; }
+  .hist-d { color: var(--muted); font-size: 13px; }
+  .hist-body { margin-top: 8px; font-size: 13px; color: var(--muted); display: none; }
+  .hist-body.open { display: block; }
+  .hist-body div { padding: 3px 0; border-bottom: 1px solid var(--line); }
+  .hist-body div:last-of-type { border-bottom: none; }
+  .hist-body b { color: var(--text); font-weight: 600; }
+  .del { background: none; border: none; color: var(--down); font-family: inherit; font-size: 12.5px; cursor: pointer; padding: 6px 0 0; }
+
+  .empty { color: var(--muted); font-size: 14px; padding: 28px 4px; }
+  .empty b { color: var(--text); display: block; font-size: 15px; margin-bottom: 4px; }
+
+  .modal { position: fixed; inset: 0; z-index: 60; background: rgba(10,13,17,.82); display: none; align-items: center; justify-content: center; padding: 16px; }
+  .modal.on { display: flex; }
+  .sheet { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; width: 100%; max-width: 520px; max-height: 84vh; overflow: auto; }
+  .sheet h3 { margin: 0 0 2px; font-size: 16px; }
+  .sheet p { margin: 0 0 12px; color: var(--muted); font-size: 12.5px; }
+  .sheet .close { margin-top: 14px; width: 100%; background: var(--panel-2); border: 1px solid var(--line); color: var(--text); border-radius: 8px; padding: 11px; font-family: inherit; font-size: 14px; cursor: pointer; }
+
+  .toast { position: fixed; bottom: calc(96px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); background: var(--gold); color: #1A1305; padding: 10px 16px; border-radius: 999px; font-size: 13.5px; font-weight: 600; z-index: 70; opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .toast.on { opacity: 1; }
+
+  .warn { background: #3a2a1a; border: 1px solid var(--gold-dim); color: var(--gold); border-radius: 8px; padding: 9px 11px; font-size: 12.5px; margin-top: 12px; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  @media (max-width: 400px) { .setrow { grid-template-columns: 24px 50px 1fr 1fr 48px; } }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------------- storage: works standalone, hosted, or inside Claude ---------------- */
+  var Store = (function () {
+    var mem = {};
+    var hasLS = false;
+    try {
+      window.localStorage.setItem("__probe", "1");
+      window.localStorage.removeItem("__probe");
+      hasLS = true;
+    } catch (e) { hasLS = false; }
+    var hasWS = !!(window.storage && typeof window.storage.get === "function");
+
+    return {
+      mode: hasLS ? "device" : (hasWS ? "claude" : "memory"),
+      get: function (k) {
+        if (hasLS) { try { return Promise.resolve(window.localStorage.getItem(k)); } catch (e) { return Promise.resolve(null); } }
+        if (hasWS) return window.storage.get(k, false).then(function (r) { return r ? r.value : null; }).catch(function () { return null; });
+        return Promise.resolve(mem[k] || null);
+      },
+      set: function (k, v) {
+        if (hasLS) { try { window.localStorage.setItem(k, v); return Promise.resolve(true); } catch (e) { return Promise.resolve(false); } }
+        if (hasWS) return window.storage.set(k, v, false).then(function () { return true; }).catch(function () { return false; });
+        mem[k] = v; return Promise.resolve(false);
+      }
+    };
+  })();
+
+  /* ---------------- program ---------------- */
+  var P = {
+    fb1: {
+      label: "Full Body 1",
+      note: "Bench, machine row and hack squat run the descending 6-8 \u2192 2-4 scheme. Add ~5% each set. Beat last week's top set.",
+      blocks: [
+        { ex: [{
+          id: "bench", name: "Barbell Bench Press",
+          alts: ["Barbell Bench Press", "30\u00b0 Incline Smith Machine Press"],
+          tempo: "3-0-1-0", cue: "Slow into the stretch. Increase weight with each set.",
+          sets: [{ t: "6-8", r: 150 }, { t: "4-6", r: 150 }, { t: "2-4", r: 150 }]
+        }]},
+        { superset: "Superset \u2014 3 rounds", ex: [
+          { id: "legext", name: "Leg Extension", tempo: "2-0-1-1",
+            cue: "Strong pause at the top every single rep. Don't jettison out of the bottom. Own the squeeze.",
+            sets: [{ t: "12-15", r: 120 }, { t: "10-12", r: 120 }, { t: "8-10", r: 120 }] },
+          { id: "machrow", name: "Machine Row",
+            alts: ["Machine Row", "T-Bar Row", "Incline Dumbbell Row (upper back)"],
+            tempo: "3-0-1-1", cue: "Pause in squeeze, let the shoulders reach into the stretch. Straps if you have them.",
+            sets: [{ t: "6-8", r: 120 }, { t: "4-6", r: 120 }, { t: "2-4", r: 120 }] }
+        ]},
+        { ex: [{ id: "hacksquat", name: "Machine Hack Squat", tempo: "3-0-1-0",
+          cue: "3 seconds down. Last set should be pretty grim.",
+          sets: [{ t: "6-8", r: 150 }, { t: "4-6", r: 150 }, { t: "2-4", r: 150 }] }]},
+        { ex: [{ id: "cslatraise", name: "Chest Supported DB Lateral Raise", tempo: "2-0-1-1",
+          cue: "Pause in squeeze at the top.", protocol: "Last set: rest-pause \u00d7 1",
+          sets: [{ t: "8-10", r: 90 }, { t: "8-10", r: 90 }, { t: "8-10", r: 90 }] }]},
+        { ex: [{ id: "calfraise", name: "Standing Calf Raise", tempo: "2-2-1-2",
+          cue: "Pause 2 seconds at the top and the bottom.", protocol: "Last set: rest-pause \u00d7 1",
+          sets: [{ t: "10-15", r: 120 }, { t: "10-15", r: 120 }] }]}
+      ]
+    },
+    fb2: {
+      label: "Full Body 2",
+      note: "Hamstring curl is the descending set. Everything else is straight rep ranges with an intensity technique on the last set.",
+      blocks: [
+        { ex: [{ id: "hamcurl", name: "Seated Hamstring Curl", tempo: "2-0-1-1",
+          cue: "Pause in stretch. Increase weight with each set.",
+          protocol: "Last set: hit 8, lean forward slightly, lengthened partials to failure",
+          sets: [{ t: "6-8", r: 120 }, { t: "4-6", r: 120 }, { t: "2-4", r: 120 }] }]},
+        { ex: [{ id: "legpress", name: "Leg Press \u2014 Quad Focus", tempo: "3-0-1-0",
+          cue: "3 seconds down.", protocol: "Last set: rest-pause \u00d7 1",
+          sets: [{ t: "8-10", r: 150 }, { t: "8-10", r: 150 }, { t: "8-10", r: 150 }] }]},
+        { ex: [{ id: "cablelat", name: "Cable Lateral Raise", tempo: "2-0-1-1",
+          cue: "Pause in squeeze. Increase weight with each set.",
+          protocol: "Last set: hit 10, step closer to the cables, bottom-half partials to failure",
+          sets: [{ t: "10-12", r: 60 }, { t: "10-12", r: 60 }] }]},
+        { ex: [{ id: "pecfly", name: "Pec Fly", tempo: "3-0-1-0",
+          cue: "Slow into the stretch.", protocol: "Last set: rest-pause \u00d7 1",
+          sets: [{ t: "10-12", r: 90 }, { t: "10-12", r: 90 }] }]},
+        { superset: "Superset \u2014 3 rounds", ex: [
+          { id: "inclinecurl", name: "Incline DB Curl", tempo: "3-0-1-1",
+            cue: "3 seconds down. Pause in squeeze.", protocol: "Last set: rest-pause \u00d7 1",
+            sets: [{ t: "10-12", r: 60 }, { t: "10-12", r: 60 }, { t: "10-12", r: 60 }] },
+          { id: "dbskull", name: "Dumbbell Skull Crusher", tempo: "3-1-1-0",
+            cue: "Pause in the stretch.", protocol: "Last set: rest-pause \u00d7 1",
+            sets: [{ t: "10-12", r: 60 }, { t: "10-12", r: 60 }, { t: "10-12", r: 60 }] }
+        ]}
+      ]
+    },
+    fb3: {
+      label: "Full Body 3",
+      note: "Bench is the descending set. Split squat is per leg \u2014 log the weight you used, not the total.",
+      blocks: [
+        { ex: [{ id: "bench", name: "Barbell Bench Press", tempo: "3-1-1-1",
+          cue: "Brief pause on chest.",
+          sets: [{ t: "6-8", r: 150 }, { t: "4-6", r: 150 }, { t: "2-4", r: 150 }] }]},
+        { ex: [{ id: "bulgarian", name: "Bulgarian Split Squat \u2014 Quad Focus", perLeg: true,
+          tempo: "3-1-1-0", cue: "3 seconds down, 1 second pause at the bottom. Extra 30s between legs if you need it.",
+          sets: [{ t: "6-8", r: 120 }, { t: "6-8", r: 120 }] }]},
+        { ex: [{ id: "latpull", name: "Lat Pulldown \u2014 Neutral Grip", tempo: "3-1-1-0",
+          cue: "3 seconds into the stretch, strong pause at the bottom. Increase weight with each set.",
+          protocol: "Last set: drop set \u00d7 1",
+          sets: [{ t: "8-10", r: 120 }, { t: "8-10", r: 120 }, { t: "8-10", r: 120 }] }]},
+        { ex: [{ id: "reardelt", name: "Machine Rear Delt Fly", tempo: "2-0-1-1",
+          cue: "Pause in squeeze. Increase weight with each set.",
+          sets: [{ t: "8-10", r: 90 }, { t: "8-10", r: 90 }, { t: "8-10", r: 90 }] }]},
+        { superset: "Superset \u2014 3 rounds", ex: [
+          { id: "ezcurl", name: "EZ Bar Bicep Curl", tempo: "2-0-1-1",
+            cue: "Pause in squeeze.", protocol: "Last set: drop set \u00d7 1",
+            sets: [{ t: "10-12", r: 90 }, { t: "10-12", r: 90 }, { t: "10-12", r: 90 }] },
+          { id: "ezskull", name: "EZ Bar Skullcrusher", tempo: "2-0-1-1",
+            cue: "Pause in squeeze.", protocol: "Last set: drop set \u00d7 1",
+            sets: [{ t: "10-12", r: 90 }, { t: "10-12", r: 90 }, { t: "10-12", r: 90 }] }
+        ]}
+      ]
+    }
+  };
+
+  var ORDER = ["fb1", "fb2", "fb3", "cardio", "history"];
+  var TITLE = { fb1: "Full Body 1", fb2: "Full Body 2", fb3: "Full Body 3", cardio: "Run / Other", history: "History" };
+  var SESSIONS_KEY = "wt:sessions:v1";
+  var DRAFTS_KEY = "wt:drafts:v1";
+
+  var S = { tab: "fb1", sessions: [], drafts: {}, ready: false };
+
+  function todayISO() {
+    var d = new Date(), p = function (n) { return (n < 10 ? "0" : "") + n; };
+    return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
+  }
+  function eachEx(wid, fn) {
+    var w = P[wid]; if (!w) return;
+    w.blocks.forEach(function (b) { b.ex.forEach(fn); });
+  }
+  function blankDraft(id) {
+    if (id === "cardio") return { date: todayISO(), kind: "Run", mins: "", km: "", notes: "" };
+    var d = { date: todayISO(), entries: {}, variant: {} };
+    eachEx(id, function (ex) { d.entries[ex.id] = ex.sets.map(function () { return { w: "", r: "" }; }); });
+    return d;
+  }
+  function e1rm(w, r) {
+    w = parseFloat(w); r = parseFloat(r);
+    if (!w || !r || r > 20) return 0;
+    return w * (1 + r / 30);
+  }
+  function esc(s) {
+    return String(s === undefined || s === null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function load() {
+    return Promise.all([Store.get(SESSIONS_KEY), Store.get(DRAFTS_KEY)]).then(function (r) {
+      try { S.sessions = r[0] ? JSON.parse(r[0]) : []; } catch (e) { S.sessions = []; }
+      try { S.drafts = r[1] ? JSON.parse(r[1]) : {}; } catch (e) { S.drafts = {}; }
+      if (!Array.isArray(S.sessions)) S.sessions = [];
+      if (!S.drafts || typeof S.drafts !== "object") S.drafts = {};
+      S.ready = true;
+    }).catch(function () { S.ready = true; });
+  }
+  function saveSessions() { return Store.set(SESSIONS_KEY, JSON.stringify(S.sessions)); }
+  var dt = null;
+  function saveDrafts() {
+    clearTimeout(dt);
+    dt = setTimeout(function () { Store.set(DRAFTS_KEY, JSON.stringify(S.drafts)); }, 600);
+  }
+  function draft(id) {
+    if (!S.drafts[id]) S.drafts[id] = blankDraft(id);
+    if (id !== "cardio" && !S.drafts[id].entries) S.drafts[id] = blankDraft(id);
+    return S.drafts[id];
+  }
+
+  function lifts() { return S.sessions.filter(function (s) { return s.type === "lift"; }); }
+  function lastFor(exId) {
+    var all = lifts().filter(function (s) { return s.entries && s.entries[exId]; });
+    all.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+    return all[0] || null;
+  }
+  function bestE1RM(exId) {
+    var best = 0;
+    lifts().forEach(function (s) {
+      var sets = s.entries && s.entries[exId]; if (!sets) return;
+      sets.forEach(function (st) { var v = e1rm(st.w, st.r); if (v > best) best = v; });
+    });
+    return best;
+  }
+  function seriesFor(exId) {
+    var out = [];
+    lifts().forEach(function (s) {
+      var sets = s.entries && s.entries[exId]; if (!sets) return;
+      var top = 0, note = "";
+      sets.forEach(function (st) { var v = e1rm(st.w, st.r); if (v > top) { top = v; note = st.w + "kg \u00d7 " + st.r; } });
+      if (top > 0) out.push({ date: s.date, v: top, note: note });
+    });
+    out.sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+    return out;
+  }
+
+  var app = document.getElementById("app");
+
+  function render() {
+    var h = "";
+    h += '<div class="topbar"><div class="wrap">';
+    h += '<div class="brandrow"><div class="brand">Training log <span>kg</span></div>';
+    h += '<div class="tools"><button data-act="export">Export CSV</button><button data-act="import">Import</button></div></div>';
+    h += '<div class="tabs" role="tablist">';
+    ORDER.forEach(function (id) {
+      h += '<button class="tab" role="tab" aria-selected="' + (S.tab === id) + '" data-tab="' + id + '">' + esc(TITLE[id]) + "</button>";
+    });
+    h += "</div></div></div>";
+
+    h += '<div class="wrap">';
+    if (!S.ready) h += '<div class="empty">Loading\u2026</div>';
+    else if (S.tab === "history") h += renderHistory();
+    else if (S.tab === "cardio") h += renderCardio();
+    else h += renderWorkout(S.tab);
+    if (S.ready && Store.mode === "memory") {
+      h += '<div class="warn">Storage is blocked in this browser, so nothing will survive a refresh. Export a CSV before you close the tab.</div>';
+    }
+    h += "</div>";
+
+    h += '<div class="timer" id="timer"><div class="t" id="t-clock">0:00</div><div class="lbl"><div id="t-label">Rest</div><div class="bar" id="t-bar" style="width:100%"></div></div><button data-act="t-skip">Skip</button></div>';
+
+    if (S.ready && S.tab !== "history") {
+      h += '<div class="finish"><div class="finish-inner"><button class="save" data-act="complete">Complete workout</button><button class="clearbtn" data-act="reset">Clear</button></div></div>';
+    }
+    h += '<div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>';
+    h += '<div class="toast" id="toast"></div>';
+
+    app.innerHTML = h;
+    wire();
+  }
+
+  function renderWorkout(wid) {
+    var w = P[wid], d = draft(wid), h = "";
+    h += '<div class="meta"><div class="meta-note">' + esc(w.note) + "</div>";
+    h += '<div class="datefield"><span>Date</span><input type="date" data-field="date" value="' + esc(d.date) + '"></div></div>';
+    w.blocks.forEach(function (b) {
+      if (b.superset) {
+        h += '<div class="group-label">' + esc(b.superset) + '</div><div class="group">';
+        b.ex.forEach(function (ex) { h += exCard(ex, d); });
+        h += "</div>";
+      } else {
+        b.ex.forEach(function (ex) { h += exCard(ex, d); });
+      }
+    });
+    return h;
+  }
+
+  function exCard(ex, d) {
+    var name = (d.variant && d.variant[ex.id]) || ex.name;
+    var h = '<div class="ex">';
+    h += '<div class="ex-head"><div><div class="ex-name">' + esc(name) + "</div>";
+    h += '<div class="ex-sub">Tempo ' + esc(ex.tempo) + (ex.perLeg ? " \u00b7 per leg" : "") + "</div></div>";
+    h += '<button class="chart-btn" data-chart="' + ex.id + '">Progress</button></div>';
+
+    if (ex.alts) {
+      h += '<select class="alt" data-alt="' + ex.id + '">';
+      ex.alts.forEach(function (a) { h += '<option value="' + esc(a) + '"' + (a === name ? " selected" : "") + ">" + esc(a) + "</option>"; });
+      h += "</select>";
+    }
+
+    h += '<div class="sets"><div class="setrow"><div class="hdr">Set</div><div class="hdr">Target</div><div class="hdr">kg</div><div class="hdr">Reps</div><div class="hdr">Rest</div></div>';
+    var last = lastFor(ex.id);
+    var vals = d.entries[ex.id] || [];
+    ex.sets.forEach(function (st, i) {
+      var v = vals[i] || { w: "", r: "" };
+      var lw = last && last.entries[ex.id] && last.entries[ex.id][i] ? last.entries[ex.id][i] : null;
+      h += '<div class="setrow"><div class="setno">' + (i + 1) + '</div><div class="target">' + esc(st.t) + "</div>";
+      h += '<input inputmode="decimal" data-in="w" data-ex="' + ex.id + '" data-i="' + i + '" value="' + esc(v.w) + '" placeholder="' + (lw && lw.w ? esc(lw.w) : "\u2013") + '" aria-label="Weight set ' + (i + 1) + '">';
+      h += '<input inputmode="numeric" data-in="r" data-ex="' + ex.id + '" data-i="' + i + '" value="' + esc(v.r) + '" placeholder="' + (lw && lw.r ? esc(lw.r) : "\u2013") + '" aria-label="Reps set ' + (i + 1) + '">';
+      h += '<button class="rest" data-rest="' + st.r + '" data-name="' + esc(name) + '">' + st.r + "s</button></div>";
+    });
+    h += "</div>";
+
+    h += '<div class="lastline" data-status="' + ex.id + '">' + statusText(ex, d) + "</div>";
+    if (ex.protocol) h += '<div class="protocol">' + esc(ex.protocol) + "</div>";
+    if (ex.cue) h += '<div class="cue">' + esc(ex.cue) + "</div>";
+    h += "</div>";
+    return h;
+  }
+
+  function statusText(ex, d) {
+    var last = lastFor(ex.id), best = bestE1RM(ex.id);
+    var vals = d.entries[ex.id] || [], top = 0, topTxt = "";
+    vals.forEach(function (v) { var x = e1rm(v.w, v.r); if (x > top) { top = x; topTxt = v.w + "kg \u00d7 " + v.r; } });
+    var parts = [];
+    if (last) {
+      var ls = last.entries[ex.id].filter(function (x) { return x.w && x.r; }).map(function (x) { return x.w + "\u00d7" + x.r; }).join(", ");
+      parts.push("Last " + esc(last.date) + ": <b>" + esc(ls || "\u2013") + "</b>");
+    } else {
+      parts.push("No history yet \u2014 this entry sets the baseline");
+    }
+    if (best > 0) parts.push("Best e1RM <b>" + best.toFixed(1) + "kg</b>");
+    if (top > 0 && top > best + 0.05) parts.push('<span class="pr">PR pace \u2014 ' + esc(topTxt) + " \u2248 " + top.toFixed(1) + "kg</span>");
+    else if (top > 0) parts.push("Today's top \u2248 <b>" + top.toFixed(1) + "kg</b>");
+    return parts.join(" &nbsp;\u00b7&nbsp; ");
+  }
+
+  function renderCardio() {
+    var d = draft("cardio"), kinds = ["Run", "Bike", "Swim", "Row", "Walk", "Other"];
+    var h = '<div class="meta"><div class="meta-note">Your fourth session. Duration is the only field that really matters.</div>';
+    h += '<div class="datefield"><span>Date</span><input type="date" data-field="date" value="' + esc(d.date) + '"></div></div>';
+    h += '<div class="ex"><div class="field"><label>Activity</label><select data-field="kind">';
+    kinds.forEach(function (k) { h += "<option" + (k === d.kind ? " selected" : "") + ">" + k + "</option>"; });
+    h += "</select></div>";
+    h += '<div class="two"><div class="field"><label>Duration (min)</label><input inputmode="decimal" data-field="mins" value="' + esc(d.mins) + '"></div>';
+    h += '<div class="field"><label>Distance (km)</label><input inputmode="decimal" data-field="km" value="' + esc(d.km) + '"></div></div>';
+    h += '<div class="field"><label>Notes</label><textarea data-field="notes" placeholder="Route, effort, how it felt">' + esc(d.notes) + "</textarea></div></div>";
+    var past = S.sessions.filter(function (s) { return s.type === "cardio"; })
+      .sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+    if (past.length) {
+      h += '<div class="group-label">Recent</div>';
+      past.slice(0, 5).forEach(function (s) {
+        h += '<div class="hist"><div class="hist-head"><div class="hist-w">' + esc(s.kind) + " \u00b7 " + esc(s.mins || "?") + " min" + (s.km ? " \u00b7 " + esc(s.km) + " km" : "") + '</div><div class="hist-d">' + esc(s.date) + "</div></div></div>";
+      });
+    }
+    return h;
+  }
+
+  function renderHistory() {
+    if (!S.sessions.length) {
+      return '<div class="empty"><b>Nothing logged yet</b>Finish a session and it lands here.</div>';
+    }
+    var list = S.sessions.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+    var h = "";
+    list.forEach(function (s) {
+      h += '<div class="hist"><div class="hist-head" data-open="' + esc(s.id) + '">';
+      h += '<div class="hist-w">' + esc(s.type === "cardio" ? s.kind : (TITLE[s.workout] || s.workout)) + "</div>";
+      h += '<div class="hist-d">' + esc(s.date) + "</div></div>";
+      h += '<div class="hist-body" id="hb-' + esc(s.id) + '">';
+      if (s.type === "cardio") {
+        h += "<div>" + esc(s.mins || "?") + " min" + (s.km ? " \u00b7 " + esc(s.km) + " km" : "") + "</div>";
+        if (s.notes) h += "<div>" + esc(s.notes) + "</div>";
+      } else {
+        Object.keys(s.entries).forEach(function (k) {
+          var sets = s.entries[k].filter(function (x) { return x.w && x.r; });
+          if (!sets.length) return;
+          var nm = (s.names && s.names[k]) || k;
+          h += "<div><b>" + esc(nm) + "</b> \u2014 " + esc(sets.map(function (x) { return x.w + "\u00d7" + x.r; }).join(", ")) + "</div>";
+        });
+      }
+      h += '<button class="del" data-del="' + esc(s.id) + '">Delete this session</button></div></div>';
+    });
+    return h;
+  }
+
+  function showChart(exId) {
+    var data = seriesFor(exId), name = exId;
+    Object.keys(P).forEach(function (w) { eachEx(w, function (ex) { if (ex.id === exId) name = ex.name; }); });
+    var body;
+    if (data.length < 2) {
+      body = "<p>Two logged sessions needed to draw a trend. You have " + data.length + ".</p>";
+    } else {
+      var W = 480, H = 180, pad = 30;
+      var vs = data.map(function (d) { return d.v; });
+      var min = Math.min.apply(null, vs) * 0.95, max = Math.max.apply(null, vs) * 1.05;
+      if (max === min) max = min + 1;
+      var x = function (i) { return pad + (i * (W - pad * 2)) / (data.length - 1); };
+      var y = function (v) { return H - pad - ((v - min) / (max - min)) * (H - pad * 2); };
+      var path = data.map(function (d, i) { return (i ? "L" : "M") + x(i).toFixed(1) + " " + y(d.v).toFixed(1); }).join(" ");
+      body = '<svg viewBox="0 0 ' + W + " " + H + '" style="width:100%;height:auto">';
+      body += '<line x1="' + pad + '" y1="' + (H - pad) + '" x2="' + (W - pad) + '" y2="' + (H - pad) + '" stroke="#37424F"/>';
+      body += '<path d="' + path + '" fill="none" stroke="#E0A93B" stroke-width="2"/>';
+      data.forEach(function (d, i) { body += '<circle cx="' + x(i).toFixed(1) + '" cy="' + y(d.v).toFixed(1) + '" r="3.5" fill="#E0A93B"/>'; });
+      body += '<text x="' + pad + '" y="16" fill="#8E9AA8" font-size="11">' + max.toFixed(0) + "kg</text>";
+      body += '<text x="' + pad + '" y="' + (H - 8) + '" fill="#8E9AA8" font-size="11">' + esc(data[0].date) + "</text>";
+      body += '<text x="' + (W - pad) + '" y="' + (H - 8) + '" fill="#8E9AA8" font-size="11" text-anchor="end">' + esc(data[data.length - 1].date) + "</text></svg>";
+      body += '<p style="margin-top:10px">Latest top set ' + esc(data[data.length - 1].note) + ". Estimated 1RM (Epley) \u2014 directional, not gospel.</p>";
+    }
+    var sheet = document.getElementById("sheet");
+    sheet.innerHTML = "<h3>" + esc(name) + "</h3><p>Top-set estimated 1RM over time</p>" + body +
+      '<button class="close" data-act="close">Close</button>';
+    document.getElementById("modal").classList.add("on");
+    wireActs();
+  }
+
+  var tState = null;
+  function startTimer(secs, label) {
+    stopTimer();
+    var el = document.getElementById("timer");
+    document.getElementById("t-label").textContent = label + " \u00b7 rest";
+    el.classList.add("on");
+    var end = Date.now() + secs * 1000;
+    tState = setInterval(function () {
+      var left = Math.max(0, Math.round((end - Date.now()) / 1000));
+      var m = Math.floor(left / 60), s = left % 60;
+      document.getElementById("t-clock").textContent = m + ":" + (s < 10 ? "0" : "") + s;
+      document.getElementById("t-bar").style.width = ((left / secs) * 100) + "%";
+      if (left <= 0) {
+        stopTimer();
+        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+        toast("Rest done \u2014 go");
+      }
+    }, 250);
+  }
+  function stopTimer() {
+    if (tState) clearInterval(tState);
+    tState = null;
+    var el = document.getElementById("timer");
+    if (el) el.classList.remove("on");
+  }
+  function toast(msg) {
+    var t = document.getElementById("toast");
+    if (!t) return;
+    t.textContent = msg; t.classList.add("on");
+    setTimeout(function () { t.classList.remove("on"); }, 2200);
+  }
+
+  function exportCSV() {
+    var rows = [["date", "session", "exercise", "set", "weight_kg", "reps", "est_1rm", "notes"]];
+    S.sessions.slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; }).forEach(function (s) {
+      if (s.type === "cardio") {
+        rows.push([s.date, "Cardio", s.kind, "", "", "", "", (s.mins || "") + "min " + (s.km ? s.km + "km " : "") + (s.notes || "")]);
+      } else {
+        Object.keys(s.entries).forEach(function (k) {
+          var nm = (s.names && s.names[k]) || k;
+          s.entries[k].forEach(function (st, i) {
+            if (!st.w && !st.r) return;
+            rows.push([s.date, TITLE[s.workout] || s.workout, nm, i + 1, st.w, st.r, e1rm(st.w, st.r).toFixed(1), ""]);
+          });
+        });
+      }
+    });
+    var csv = rows.map(function (r) {
+      return r.map(function (c) { return '"' + String(c === undefined ? "" : c).replace(/"/g, '""') + '"'; }).join(",");
+    }).join("\n");
+    var blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = "training-log-" + todayISO() + ".csv";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    toast("CSV exported");
+  }
+
+  function parseCSVLine(ln) {
+    var out = [], cur = "", q = false;
+    for (var i = 0; i < ln.length; i++) {
+      var ch = ln[i];
+      if (q) {
+        if (ch === '"' && ln[i + 1] === '"') { cur += '"'; i++; }
+        else if (ch === '"') q = false;
+        else cur += ch;
+      } else {
+        if (ch === '"') q = true;
+        else if (ch === ",") { out.push(cur); cur = ""; }
+        else cur += ch;
+      }
+    }
+    out.push(cur);
+    return out;
+  }
+  function findWid(label) { var o = null; Object.keys(TITLE).forEach(function (k) { if (TITLE[k] === label) o = k; }); return o; }
+  function findExId(name) {
+    var o = null;
+    Object.keys(P).forEach(function (w) {
+      eachEx(w, function (ex) {
+        if (ex.name === name) o = ex.id;
+        if (ex.alts && ex.alts.indexOf(name) > -1) o = ex.id;
+      });
+    });
+    return o;
+  }
+
+  function importCSV() {
+    var inp = document.createElement("input");
+    inp.type = "file"; inp.accept = ".csv,text/csv";
+    inp.onchange = function () {
+      var f = inp.files && inp.files[0]; if (!f) return;
+      var fr = new FileReader();
+      fr.onload = function () {
+        try {
+          var lines = String(fr.result).split(/\r?\n/).filter(function (l) { return l.trim(); }).slice(1);
+          var byKey = {};
+          lines.forEach(function (ln) {
+            var c = parseCSVLine(ln);
+            var date = c[0], sess = c[1], exName = c[2], setNo = parseInt(c[3], 10), w = c[4], r = c[5], note = c[7];
+            if (!date) return;
+            var key = date + "|" + sess;
+            if (!byKey[key]) {
+              byKey[key] = {
+                id: "i" + Math.random().toString(36).slice(2, 9), date: date,
+                type: sess === "Cardio" ? "cardio" : "lift", workout: findWid(sess),
+                entries: {}, names: {}, kind: exName, mins: "", km: "", notes: note
+              };
+            }
+            if (byKey[key].type === "lift") {
+              var exId = findExId(exName) || exName;
+              byKey[key].names[exId] = exName;
+              if (!byKey[key].entries[exId]) byKey[key].entries[exId] = [];
+              byKey[key].entries[exId][(setNo || 1) - 1] = { w: w, r: r };
+            }
+          });
+          var added = Object.keys(byKey).map(function (k) { return byKey[k]; });
+          added.forEach(function (s) {
+            if (s.type !== "lift") return;
+            Object.keys(s.entries).forEach(function (k) {
+              for (var i = 0; i < s.entries[k].length; i++) if (!s.entries[k][i]) s.entries[k][i] = { w: "", r: "" };
+            });
+          });
+          var seen = {};
+          S.sessions.forEach(function (s) { seen[s.date + "|" + (s.workout || s.kind)] = true; });
+          var fresh = added.filter(function (s) { return !seen[s.date + "|" + (s.workout || s.kind)]; });
+          S.sessions = S.sessions.concat(fresh);
+          saveSessions().then(function () { render(); toast("Imported " + fresh.length + " session(s)"); });
+        } catch (e) { toast("Couldn't read that file"); }
+      };
+      fr.readAsText(f);
+    };
+    inp.click();
+  }
+
+  function complete() {
+    var wid = S.tab, d = draft(wid);
+    if (wid === "cardio") {
+      if (!d.mins) { toast("Add a duration first"); return; }
+      S.sessions.push({ id: "s" + Date.now(), type: "cardio", date: d.date, kind: d.kind, mins: d.mins, km: d.km, notes: d.notes });
+    } else {
+      var any = false;
+      Object.keys(d.entries).forEach(function (k) { d.entries[k].forEach(function (st) { if (st.w && st.r) any = true; }); });
+      if (!any) { toast("Log at least one set first"); return; }
+      var names = {};
+      eachEx(wid, function (ex) { names[ex.id] = (d.variant && d.variant[ex.id]) || ex.name; });
+      S.sessions.push({
+        id: "s" + Date.now(), type: "lift", workout: wid, date: d.date,
+        entries: JSON.parse(JSON.stringify(d.entries)), names: names
+      });
+    }
+    var stamped = d.date;
+    S.drafts[wid] = blankDraft(wid);
+    saveDrafts();
+    saveSessions().then(function (ok) {
+      render();
+      toast(ok ? "Logged " + stamped : "Logged \u2014 but not saved to disk, export now");
+    });
+  }
+
+  function wireActs() {
+    document.querySelectorAll("[data-act]").forEach(function (b) {
+      b.onclick = function () {
+        var a = b.dataset.act;
+        if (a === "export") exportCSV();
+        else if (a === "import") importCSV();
+        else if (a === "complete") complete();
+        else if (a === "reset") { S.drafts[S.tab] = blankDraft(S.tab); saveDrafts(); render(); toast("Cleared"); }
+        else if (a === "close") document.getElementById("modal").classList.remove("on");
+        else if (a === "t-skip") stopTimer();
+      };
+    });
+  }
+
+  function wire() {
+    app.querySelectorAll("[data-tab]").forEach(function (b) {
+      b.onclick = function () { S.tab = b.dataset.tab; stopTimer(); render(); };
+    });
+    app.querySelectorAll("[data-in]").forEach(function (inp) {
+      inp.oninput = function () {
+        var d = draft(S.tab), ex = inp.dataset.ex, i = +inp.dataset.i;
+        if (!d.entries[ex]) d.entries[ex] = [];
+        if (!d.entries[ex][i]) d.entries[ex][i] = { w: "", r: "" };
+        d.entries[ex][i][inp.dataset.in] = inp.value;
+        var node = app.querySelector('[data-status="' + ex + '"]');
+        if (node) {
+          var def = null;
+          eachEx(S.tab, function (e) { if (e.id === ex) def = e; });
+          if (def) node.innerHTML = statusText(def, d);
+        }
+        saveDrafts();
+      };
+    });
+    app.querySelectorAll("[data-field]").forEach(function (inp) {
+      var h = function () { draft(S.tab)[inp.dataset.field] = inp.value; saveDrafts(); };
+      inp.oninput = h; inp.onchange = h;
+    });
+    app.querySelectorAll("[data-alt]").forEach(function (sel) {
+      sel.onchange = function () {
+        var d = draft(S.tab);
+        if (!d.variant) d.variant = {};
+        d.variant[sel.dataset.alt] = sel.value;
+        saveDrafts(); render();
+      };
+    });
+    app.querySelectorAll("[data-rest]").forEach(function (b) {
+      b.onclick = function () { startTimer(+b.dataset.rest, b.dataset.name); };
+    });
+    app.querySelectorAll("[data-chart]").forEach(function (b) {
+      b.onclick = function () { showChart(b.dataset.chart); };
+    });
+    app.querySelectorAll("[data-open]").forEach(function (b) {
+      b.onclick = function () {
+        var el = document.getElementById("hb-" + b.dataset.open);
+        if (el) el.classList.toggle("open");
+      };
+    });
+    app.querySelectorAll("[data-del]").forEach(function (b) {
+      b.onclick = function () {
+        S.sessions = S.sessions.filter(function (s) { return s.id !== b.dataset.del; });
+        saveSessions().then(function () { render(); toast("Session deleted"); });
+      };
+    });
+    wireActs();
+    var modal = document.getElementById("modal");
+    if (modal) modal.onclick = function (e) { if (e.target === modal) modal.classList.remove("on"); };
+  }
+
+  render();
+  load().then(render).catch(function () { S.ready = true; render(); });
+
+  if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("sw.js").catch(function () {});
+    });
+  }
+})();
+</script>
+</body>
+</html>
