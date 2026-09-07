@@ -195,6 +195,21 @@
   .pr-val { color: var(--gold); font-weight: 700; white-space: nowrap; }
 
   .total-sessions { margin-top: 20px; font-size: 13px; color: var(--muted); padding-bottom: 8px; }
+
+  .sub-tabs { display: flex; gap: 4px; margin: 14px 0 2px; border-bottom: 1px solid var(--line); padding-bottom: 0; }
+  .sub-tab { background: none; border: none; color: var(--muted); font-family: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; padding: 6px 12px 10px; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+  .sub-tab.on { color: var(--text); border-bottom-color: var(--gold); }
+
+  .record-row { display: flex; align-items: baseline; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+  .record-row:last-of-type { border-bottom: none; }
+  .record-name { flex: 1; font-size: 13.5px; font-weight: 600; }
+  .record-val { color: var(--gold); font-weight: 700; font-size: 13.5px; white-space: nowrap; }
+  .record-set { color: var(--muted); font-size: 12px; white-space: nowrap; }
+
+  .chart-block { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px; margin-top: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.2); }
+  .chart-block-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+  .chart-block-sub { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .no-data { color: var(--muted); font-size: 13.5px; padding: 20px 0; }
 </style>
 </head>
 <body>
@@ -324,7 +339,7 @@
   var SESSIONS_KEY = "wt:sessions:v1";
   var DRAFTS_KEY = "wt:drafts:v1";
 
-  var S = { tab: "home", sessions: [], drafts: {}, ready: false };
+  var S = { tab: "home", histTab: "sessions", sessions: [], drafts: {}, ready: false };
 
   function todayISO() {
     var d = new Date(), p = function (n) { return (n < 10 ? "0" : "") + n; };
@@ -608,29 +623,107 @@
   }
 
   function renderHistory() {
-    if (!S.sessions.length) {
-      return '<div class="empty"><b>Nothing logged yet</b>Finish a session and it lands here.</div>';
-    }
-    var list = S.sessions.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; });
     var h = "";
-    list.forEach(function (s) {
-      h += '<div class="hist"><div class="hist-head" data-open="' + esc(s.id) + '">';
-      h += '<div class="hist-w">' + esc(s.type === "cardio" ? s.kind : (TITLE[s.workout] || s.workout)) + "</div>";
-      h += '<div class="hist-d">' + esc(s.date) + "</div></div>";
-      h += '<div class="hist-body" id="hb-' + esc(s.id) + '">';
-      if (s.type === "cardio") {
-        h += "<div>" + esc(s.mins || "?") + " min" + (s.km ? " \u00b7 " + esc(s.km) + " km" : "") + "</div>";
-        if (s.notes) h += "<div>" + esc(s.notes) + "</div>";
-      } else {
-        Object.keys(s.entries).forEach(function (k) {
-          var sets = s.entries[k].filter(function (x) { return x.w && x.r; });
-          if (!sets.length) return;
-          var nm = (s.names && s.names[k]) || k;
-          h += "<div><b>" + esc(nm) + "</b> \u2014 " + esc(sets.map(function (x) { return x.w + "\u00d7" + x.r; }).join(", ")) + "</div>";
-        });
-      }
-      h += '<button class="del" data-del="' + esc(s.id) + '">Delete this session</button></div></div>';
+
+    // Sub-tab bar
+    var subTabs = [["sessions","Sessions"],["records","Records"],["charts","Charts"]];
+    h += '<div class="sub-tabs">';
+    subTabs.forEach(function (t) {
+      h += '<button class="sub-tab' + (S.histTab === t[0] ? " on" : "") + '" data-htab="' + t[0] + '">' + t[1] + "</button>";
     });
+    h += "</div>";
+
+    if (S.histTab === "sessions") {
+      if (!S.sessions.length) {
+        return h + '<div class="empty"><b>Nothing logged yet</b>Finish a session and it lands here.</div>';
+      }
+      var list = S.sessions.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+      list.forEach(function (s) {
+        h += '<div class="hist"><div class="hist-head" data-open="' + esc(s.id) + '">';
+        h += '<div class="hist-w">' + esc(s.type === "cardio" ? s.kind : (TITLE[s.workout] || s.workout)) + "</div>";
+        h += '<div class="hist-d">' + esc(s.date) + "</div></div>";
+        h += '<div class="hist-body" id="hb-' + esc(s.id) + '">';
+        if (s.type === "cardio") {
+          h += "<div>" + esc(s.mins || "?") + " min" + (s.km ? " \u00b7 " + esc(s.km) + " km" : "") + "</div>";
+          if (s.notes) h += "<div>" + esc(s.notes) + "</div>";
+        } else {
+          Object.keys(s.entries).forEach(function (k) {
+            var sets = s.entries[k].filter(function (x) { return x.w && x.r; });
+            if (!sets.length) return;
+            var nm = (s.names && s.names[k]) || k;
+            h += "<div><b>" + esc(nm) + "</b> \u2014 " + esc(sets.map(function (x) { return x.w + "\u00d7" + x.r; }).join(", ")) + "</div>";
+          });
+        }
+        h += '<button class="del" data-del="' + esc(s.id) + '">Delete this session</button></div></div>';
+      });
+    }
+
+    else if (S.histTab === "records") {
+      var records = [];
+      var seenR = {};
+      Object.keys(P).forEach(function (wid) {
+        eachEx(wid, function (ex) {
+          if (seenR[ex.id]) return;
+          seenR[ex.id] = true;
+          var best = bestE1RM(ex.id);
+          if (best <= 0) return;
+          var series = seriesFor(ex.id);
+          var topSet = "";
+          if (series.length) topSet = series[series.length - 1].note;
+          records.push({ name: ex.name, val: best, set: topSet });
+        });
+      });
+      records.sort(function (a, b) { return b.val - a.val; });
+      if (!records.length) {
+        h += '<div class="no-data">Complete a session to see your records here.</div>';
+      } else {
+        h += '<div class="hist" style="margin-top:12px">';
+        records.forEach(function (r) {
+          h += '<div class="record-row"><div class="record-name">' + esc(r.name) + "</div>";
+          h += '<div class="record-set">' + esc(r.set) + "</div>";
+          h += '<div class="record-val">' + r.val.toFixed(1) + " kg e1RM</div></div>";
+        });
+        h += "</div>";
+      }
+    }
+
+    else if (S.histTab === "charts") {
+      var seenC = {};
+      var hasChart = false;
+      Object.keys(P).forEach(function (wid) {
+        eachEx(wid, function (ex) {
+          if (seenC[ex.id]) return;
+          seenC[ex.id] = true;
+          var data = seriesFor(ex.id);
+          if (data.length < 2) return;
+          hasChart = true;
+          var W = 480, H = 160, pad = 28;
+          var vs = data.map(function (d) { return d.v; });
+          var min = Math.min.apply(null, vs) * 0.95, max = Math.max.apply(null, vs) * 1.05;
+          if (max === min) max = min + 1;
+          var cx = function (i) { return pad + (i * (W - pad * 2)) / (data.length - 1); };
+          var cy = function (v) { return H - pad - ((v - min) / (max - min)) * (H - pad * 2); };
+          var path = data.map(function (d, i) { return (i ? "L" : "M") + cx(i).toFixed(1) + " " + cy(d.v).toFixed(1); }).join(" ");
+          h += '<div class="chart-block">';
+          h += '<div class="chart-block-name">' + esc(ex.name) + "</div>";
+          h += '<div class="chart-block-sub">Top-set estimated 1RM over time</div>';
+          h += '<svg viewBox="0 0 ' + W + " " + H + '" style="width:100%;height:auto">';
+          h += '<line x1="' + pad + '" y1="' + (H - pad) + '" x2="' + (W - pad) + '" y2="' + (H - pad) + '" stroke="' + "var(--line)" + '"/>';
+          h += '<path d="' + path + '" fill="none" stroke="#E0A93B" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+          data.forEach(function (d, i) {
+            h += '<circle cx="' + cx(i).toFixed(1) + '" cy="' + cy(d.v).toFixed(1) + '" r="4" fill="#E0A93B"/>';
+          });
+          h += '<text x="' + pad + '" y="16" fill="#8A97A6" font-size="11">' + max.toFixed(0) + " kg</text>";
+          h += '<text x="' + pad + '" y="' + (H - 8) + '" fill="#8A97A6" font-size="11">' + esc(data[0].date) + "</text>";
+          h += '<text x="' + (W - pad) + '" y="' + (H - 8) + '" fill="#8A97A6" font-size="11" text-anchor="end">' + esc(data[data.length - 1].date) + "</text>";
+          h += "</svg></div>";
+        });
+      });
+      if (!hasChart) {
+        h += '<div class="no-data">Log at least two sessions per exercise to see trend charts here.</div>';
+      }
+    }
+
     return h;
   }
 
@@ -851,6 +944,9 @@
         }
         S.tab = wid; stopTimer(); render();
       };
+    });
+    app.querySelectorAll("[data-htab]").forEach(function (b) {
+      b.onclick = function () { S.histTab = b.dataset.htab; render(); };
     });
     app.querySelectorAll("[data-tab]").forEach(function (b) {
       b.onclick = function () { S.tab = b.dataset.tab; stopTimer(); render(); };
