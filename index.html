@@ -159,6 +159,31 @@
 
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
   @media (max-width: 400px) { .setrow { grid-template-columns: 24px 50px 1fr 1fr 48px; } }
+
+  .home-section { font-size: 11px; font-weight: 700; color: var(--gold); letter-spacing: .06em; margin: 18px 0 8px; display: flex; align-items: center; gap: 8px; }
+  .home-section::after { content: ""; flex: 1; height: 1px; background: var(--gold-dim); }
+
+  .week-strip { display: flex; gap: 6px; }
+  .week-day { display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1; }
+  .day-dot { width: 28px; height: 28px; border-radius: 50%; background: var(--panel-2); border: 1.5px solid var(--line); }
+  .day-dot.active { background: var(--gold); border-color: var(--gold); }
+  .day-dot.today:not(.active) { border-color: var(--gold); }
+  .day-label { font-size: 10px; color: var(--muted); font-weight: 600; }
+  .week-count { margin-top: 8px; font-size: 13px; color: var(--muted); }
+
+  .up-next-card { background: var(--panel); border: 1px solid var(--gold-dim); border-radius: var(--radius); padding: 14px; margin-top: 2px; }
+  .up-next-name { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
+  .up-next-last { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+  .up-next-btn { margin-top: 12px; background: var(--gold); color: #1A1305; border: none; border-radius: 8px; padding: 11px 18px; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; }
+  .up-next-btn:hover { opacity: .88; }
+
+  .pr-row { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+  .pr-row:last-of-type { border-bottom: none; }
+  .pr-star { color: var(--gold); font-size: 14px; flex: 0 0 auto; }
+  .pr-name { flex: 1; }
+  .pr-val { color: var(--gold); font-weight: 700; white-space: nowrap; }
+
+  .total-sessions { margin-top: 20px; font-size: 13px; color: var(--muted); padding-bottom: 8px; }
 </style>
 </head>
 <body>
@@ -283,12 +308,12 @@
     }
   };
 
-  var ORDER = ["fb1", "fb2", "fb3", "cardio", "history"];
-  var TITLE = { fb1: "Full Body 1", fb2: "Full Body 2", fb3: "Full Body 3", cardio: "Run / Other", history: "History" };
+  var ORDER = ["home", "fb1", "fb2", "fb3", "cardio", "history"];
+  var TITLE = { home: "Home", fb1: "Full Body 1", fb2: "Full Body 2", fb3: "Full Body 3", cardio: "Run / Other", history: "History" };
   var SESSIONS_KEY = "wt:sessions:v1";
   var DRAFTS_KEY = "wt:drafts:v1";
 
-  var S = { tab: "fb1", sessions: [], drafts: {}, ready: false };
+  var S = { tab: "home", sessions: [], drafts: {}, ready: false };
 
   function todayISO() {
     var d = new Date(), p = function (n) { return (n < 10 ? "0" : "") + n; };
@@ -377,6 +402,7 @@
 
     h += '<div class="wrap">';
     if (!S.ready) h += '<div class="empty">Loading\u2026</div>';
+    else if (S.tab === "home") h += renderHome();
     else if (S.tab === "history") h += renderHistory();
     else if (S.tab === "cardio") h += renderCardio();
     else h += renderWorkout(S.tab);
@@ -387,7 +413,7 @@
 
     h += '<div class="timer" id="timer"><div class="t" id="t-clock">0:00</div><div class="lbl"><div id="t-label">Rest</div><div class="bar" id="t-bar" style="width:100%"></div></div><button data-act="t-skip">Skip</button></div>';
 
-    if (S.ready && S.tab !== "history") {
+    if (S.ready && S.tab !== "history" && S.tab !== "home") {
       h += '<div class="finish"><div class="finish-inner"><button class="save" data-act="complete">Complete workout</button><button class="clearbtn" data-act="reset">Clear</button></div></div>';
     }
     h += '<div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>';
@@ -395,6 +421,82 @@
 
     app.innerHTML = h;
     wire();
+  }
+
+  function renderHome() {
+    var h = "";
+
+    // This week strip
+    var dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+    var today = new Date();
+    var dow = today.getDay();
+    var mondayOffset = dow === 0 ? -6 : 1 - dow;
+    var monday = new Date(today);
+    monday.setDate(today.getDate() + mondayOffset);
+    var p = function (n) { return (n < 10 ? "0" : "") + n; };
+    var weekDates = [];
+    for (var i = 0; i < 7; i++) {
+      var d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      weekDates.push(d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()));
+    }
+    var sessionDates = {};
+    S.sessions.forEach(function (s) { sessionDates[s.date] = true; });
+    var weekCount = weekDates.filter(function (d) { return sessionDates[d]; }).length;
+    var isoToday = todayISO();
+
+    h += '<div class="home-section">THIS WEEK</div>';
+    h += '<div class="week-strip">';
+    dayNames.forEach(function (day, i) {
+      var active = !!sessionDates[weekDates[i]];
+      var isToday = weekDates[i] === isoToday;
+      h += '<div class="week-day"><div class="day-dot' + (active ? " active" : "") + (isToday ? " today" : "") + '"></div><div class="day-label">' + day + "</div></div>";
+    });
+    h += "</div>";
+    h += '<div class="week-count">' + weekCount + " of 4 sessions this week</div>";
+
+    // Up Next
+    var wOrder = ["fb1", "fb2", "fb3", "cardio"];
+    var sorted = S.sessions.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+    var lastWid = sorted.length ? (sorted[0].type === "cardio" ? "cardio" : sorted[0].workout) : null;
+    var idx = lastWid ? wOrder.indexOf(lastWid) : -1;
+    var nextWid = wOrder[(idx + 1) % wOrder.length];
+    var lastDoneDate = null;
+    sorted.forEach(function (s) {
+      if (lastDoneDate) return;
+      if ((s.type === "cardio" ? "cardio" : s.workout) === nextWid) lastDoneDate = s.date;
+    });
+
+    h += '<div class="home-section">UP NEXT</div>';
+    h += '<div class="up-next-card">';
+    h += '<div class="up-next-name">' + esc(TITLE[nextWid]) + "</div>";
+    h += '<div class="up-next-last">' + (lastDoneDate ? "Last done " + esc(lastDoneDate) : "Not done yet — this sets the baseline") + "</div>";
+    h += '<button class="up-next-btn" data-go="' + nextWid + '">→ Start ' + esc(TITLE[nextWid]) + "</button>";
+    h += "</div>";
+
+    // Recent PRs
+    var prs = [], seenPR = {};
+    Object.keys(P).forEach(function (wid) {
+      eachEx(wid, function (ex) {
+        if (seenPR[ex.id]) return;
+        seenPR[ex.id] = true;
+        var best = bestE1RM(ex.id);
+        if (best <= 0) return;
+        var series = seriesFor(ex.id);
+        if (series.length > 0 && Math.abs(series[series.length - 1].v - best) < 0.1) {
+          prs.push({ name: ex.name, val: best });
+        }
+      });
+    });
+    if (prs.length) {
+      h += '<div class="home-section">RECENT PRs</div>';
+      prs.slice(0, 3).forEach(function (pr) {
+        h += '<div class="pr-row"><span class="pr-star">★</span><span class="pr-name">' + esc(pr.name) + '</span><span class="pr-val">' + pr.val.toFixed(1) + " kg e1RM</span></div>";
+      });
+    }
+
+    h += '<div class="total-sessions">Total sessions logged: <b>' + S.sessions.length + "</b></div>";
+    return h;
   }
 
   function renderWorkout(wid) {
@@ -717,6 +819,9 @@
   }
 
   function wire() {
+    app.querySelectorAll("[data-go]").forEach(function (b) {
+      b.onclick = function () { S.tab = b.dataset.go; stopTimer(); render(); };
+    });
     app.querySelectorAll("[data-tab]").forEach(function (b) {
       b.onclick = function () { S.tab = b.dataset.tab; stopTimer(); render(); };
     });
