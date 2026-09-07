@@ -178,15 +178,21 @@
   .home-datefield input { background: var(--panel); border: 1px solid var(--line); color: var(--text); border-radius: 7px; padding: 6px 9px; font-family: inherit; font-size: 13px; }
 
   .workout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 2px; }
-  .workout-option { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,.2); transition: border-color .15s; }
-  .workout-option.recommended { border-color: rgba(224,169,59,.4); background: radial-gradient(ellipse at 0% 0%, rgba(224,169,59,.08) 0%, transparent 70%), var(--panel); box-shadow: 0 2px 12px rgba(0,0,0,.25), 0 0 0 1px rgba(224,169,59,.15); }
+  .workout-option { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 3px; box-shadow: 0 2px 8px rgba(0,0,0,.2); cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+  .workout-option.selected { border-color: rgba(224,169,59,.45); background: radial-gradient(ellipse at 0% 0%, rgba(224,169,59,.09) 0%, transparent 70%), var(--panel); box-shadow: 0 2px 12px rgba(0,0,0,.25), 0 0 0 1px rgba(224,169,59,.2); }
+  .workout-option:not(.selected):hover { border-color: var(--muted); }
   .rec-badge { display: inline-flex; align-items: center; font-size: 10px; font-weight: 700; color: #1A1305; background: var(--gold); border-radius: 999px; padding: 2px 8px; letter-spacing: .04em; margin-bottom: 3px; width: fit-content; }
   .workout-option-name { font-size: 14px; font-weight: 700; }
   .workout-option-last { font-size: 11.5px; color: var(--muted); flex: 1; min-height: 28px; }
   .workout-option-btn { margin-top: 8px; background: none; border: 1px solid var(--line); color: var(--muted); border-radius: 8px; padding: 8px 10px; font-size: 12.5px; font-weight: 600; font-family: inherit; cursor: pointer; }
-  .workout-option.recommended .workout-option-btn { background: linear-gradient(135deg, #EDBA4A 0%, #C98E1E 100%); color: #1A1305; border-color: transparent; box-shadow: 0 2px 8px rgba(224,169,59,.3); }
+  .workout-option.selected .workout-option-btn { background: linear-gradient(135deg, #EDBA4A 0%, #C98E1E 100%); color: #1A1305; border-color: transparent; box-shadow: 0 2px 8px rgba(224,169,59,.3); }
   .workout-option-btn:hover { color: var(--text); border-color: var(--muted); }
-  .workout-option.recommended .workout-option-btn:hover { opacity: .88; }
+  .workout-option.selected .workout-option-btn:hover { opacity: .88; }
+
+  .skip-row { margin-top: 10px; font-size: 12.5px; color: var(--muted); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .skip-row b { color: var(--text); }
+  .skip-btn { background: none; border: 1px solid var(--line); color: var(--muted); border-radius: 7px; padding: 5px 11px; font-size: 12px; font-family: inherit; cursor: pointer; }
+  .skip-btn:hover { border-color: var(--muted); color: var(--text); }
 
   .pr-row { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
   .pr-row:last-of-type { border-bottom: none; }
@@ -339,7 +345,7 @@
   var SESSIONS_KEY = "wt:sessions:v1";
   var DRAFTS_KEY = "wt:drafts:v1";
 
-  var S = { tab: "home", histTab: "sessions", sessions: [], drafts: {}, ready: false };
+  var S = { tab: "home", histTab: "sessions", homeSelected: null, sessions: [], drafts: {}, ready: false };
 
   function todayISO() {
     var d = new Date(), p = function (n) { return (n < 10 ? "0" : "") + n; };
@@ -493,15 +499,18 @@
     var nextWid = wOrder[(idx + 1) % wOrder.length];
 
     h += '<div class="home-section">SELECT WORKOUT</div>';
+    var selectedWid = S.homeSelected || nextWid;
     h += '<div class="workout-grid">';
     wOrder.forEach(function (wid) {
       var isNext = wid === nextWid;
+      var isSelected = wid === selectedWid;
       var lastDone = null;
-      sorted.forEach(function (s) {
+      sorted.filter(function (s) { return s.type !== "skip"; }).forEach(function (s) {
         if (lastDone) return;
         if ((s.type === "cardio" ? "cardio" : s.workout) === wid) lastDone = s.date;
       });
-      h += '<div class="workout-option' + (isNext ? " recommended" : "") + '">';
+      var cls = "workout-option" + (isNext ? " recommended" : "") + (isSelected ? " selected" : "");
+      h += '<div class="' + cls + '" data-select="' + wid + '">';
       if (isNext) h += '<div class="rec-badge">UP NEXT</div>';
       h += '<div class="workout-option-name">' + esc(TITLE[wid]) + "</div>";
       h += '<div class="workout-option-last">' + (lastDone ? "Last " + esc(lastDone) : "Not done yet") + "</div>";
@@ -509,6 +518,7 @@
       h += "</div>";
     });
     h += "</div>";
+    h += '<div class="skip-row">Not doing <b>' + esc(TITLE[nextWid]) + '</b> today? <button class="skip-btn" data-act="skip-rotation" data-skip-wid="' + nextWid + '">Skip it →</button></div>';
 
     // Recent PRs
     var prs = [], seenPR = {};
@@ -634,10 +644,11 @@
     h += "</div>";
 
     if (S.histTab === "sessions") {
-      if (!S.sessions.length) {
+      var realSessions = S.sessions.filter(function (s) { return s.type !== "skip"; });
+      if (!realSessions.length) {
         return h + '<div class="empty"><b>Nothing logged yet</b>Finish a session and it lands here.</div>';
       }
-      var list = S.sessions.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+      var list = realSessions.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
       list.forEach(function (s) {
         h += '<div class="hist"><div class="hist-head" data-open="' + esc(s.id) + '">';
         h += '<div class="hist-w">' + esc(s.type === "cardio" ? s.kind : (TITLE[s.workout] || s.workout)) + "</div>";
@@ -926,6 +937,12 @@
         else if (a === "import") importCSV();
         else if (a === "complete") complete();
         else if (a === "reset") { S.drafts[S.tab] = blankDraft(S.tab); saveDrafts(); render(); toast("Cleared"); }
+        else if (a === "skip-rotation") {
+          var skipWid = b.dataset.skipWid;
+          S.sessions.push({ id: "sk" + Date.now(), type: "skip", workout: skipWid, date: todayISO() });
+          S.homeSelected = null;
+          saveSessions().then(function () { render(); toast("Skipped — rotation advanced"); });
+        }
         else if (a === "close") document.getElementById("modal").classList.remove("on");
         else if (a === "t-skip") stopTimer();
       };
@@ -933,6 +950,13 @@
   }
 
   function wire() {
+    app.querySelectorAll("[data-select]").forEach(function (card) {
+      card.onclick = function (e) {
+        if (e.target.closest("[data-go]")) return;
+        S.homeSelected = card.dataset.select;
+        render();
+      };
+    });
     app.querySelectorAll("[data-go]").forEach(function (b) {
       b.onclick = function () {
         var wid = b.dataset.go;
@@ -949,7 +973,7 @@
       b.onclick = function () { S.histTab = b.dataset.htab; render(); };
     });
     app.querySelectorAll("[data-tab]").forEach(function (b) {
-      b.onclick = function () { S.tab = b.dataset.tab; stopTimer(); render(); };
+      b.onclick = function () { S.tab = b.dataset.tab; S.homeSelected = null; stopTimer(); render(); };
     });
     app.querySelectorAll("[data-in]").forEach(function (inp) {
       inp.oninput = function () {
