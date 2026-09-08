@@ -22,6 +22,7 @@
     --gold-dim: #5E4A1E;
     --down: #C4614F;
     --radius: 12px;
+    --nav-h: 56px;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; background: var(--ink); }
@@ -29,7 +30,7 @@
     color: var(--text);
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     font-size: 15px; line-height: 1.45; min-height: 100vh;
-    padding-bottom: calc(100px + env(safe-area-inset-bottom));
+    padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 80px);
     font-variant-numeric: tabular-nums;
     -webkit-text-size-adjust: 100%;
   }
@@ -41,7 +42,7 @@
     background: rgba(21,28,37,.82);
     backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
     border-bottom: 1px solid rgba(255,255,255,.06);
-    padding: calc(10px + env(safe-area-inset-top)) 0 0;
+    padding: calc(10px + env(safe-area-inset-top)) 0 12px;
   }
   .brandrow { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
   .brand { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
@@ -113,9 +114,11 @@
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
   .finish {
-    position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+    position: fixed; left: 0; right: 0;
+    bottom: calc(var(--nav-h) + env(safe-area-inset-bottom));
+    z-index: 40;
     background: linear-gradient(to top, var(--ink) 72%, transparent);
-    padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+    padding: 12px 12px 12px;
     display: flex; justify-content: center;
   }
   .finish-inner { width: 100%; max-width: 616px; display: flex; gap: 8px; align-items: center; }
@@ -123,7 +126,8 @@
   .clearbtn { background: var(--panel); border: 1px solid var(--line); color: var(--muted); border-radius: var(--radius); padding: 14px 13px; font-family: inherit; font-size: 13px; cursor: pointer; }
 
   .timer {
-    position: fixed; left: 12px; right: 12px; bottom: calc(84px + env(safe-area-inset-bottom));
+    position: fixed; left: 12px; right: 12px;
+    bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 72px);
     z-index: 45; background: var(--panel-2); border: 1px solid var(--gold-dim);
     border-radius: var(--radius); padding: 10px 12px; display: none; align-items: center; gap: 12px;
     max-width: 616px; margin: 0 auto;
@@ -155,8 +159,26 @@
   .sheet p { margin: 0 0 12px; color: var(--muted); font-size: 12.5px; }
   .sheet .close { margin-top: 14px; width: 100%; background: var(--panel-2); border: 1px solid var(--line); color: var(--text); border-radius: 8px; padding: 11px; font-family: inherit; font-size: 14px; cursor: pointer; }
 
-  .toast { position: fixed; bottom: calc(96px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); background: var(--gold); color: #1A1305; padding: 10px 16px; border-radius: 999px; font-size: 13.5px; font-weight: 600; z-index: 70; opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .toast { position: fixed; bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 80px); left: 50%; transform: translateX(-50%); background: var(--gold); color: #1A1305; padding: 10px 16px; border-radius: 999px; font-size: 13.5px; font-weight: 600; z-index: 70; opacity: 0; pointer-events: none; transition: opacity .2s; }
   .toast.on { opacity: 1; }
+
+  .bottomnav {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+    height: calc(var(--nav-h) + env(safe-area-inset-bottom));
+    background: rgba(18,24,32,.92);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255,255,255,.07);
+    display: flex; align-items: flex-start; padding-top: 0;
+  }
+  .nav-item {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px; padding: 10px 2px 6px; cursor: pointer; background: none; border: none;
+    color: var(--muted); font-family: inherit; font-size: 9px; font-weight: 700;
+    letter-spacing: .04em; text-transform: uppercase; transition: color .15s;
+    height: var(--nav-h);
+  }
+  .nav-item.active { color: var(--gold); }
+  .nav-item svg { flex-shrink: 0; }
 
   .warn { background: #3a2a1a; border: 1px solid var(--gold-dim); color: var(--gold); border-radius: 8px; padding: 9px 11px; font-size: 12.5px; margin-top: 12px; }
 
@@ -426,11 +448,7 @@
     h += '<div class="topbar"><div class="wrap">';
     h += '<div class="brandrow"><div class="brand">Training log <span>kg</span></div>';
     h += '<div class="tools"><button data-act="export">Export CSV</button><button data-act="import">Import</button></div></div>';
-    h += '<div class="tabs" role="tablist">';
-    ORDER.forEach(function (id) {
-      h += '<button class="tab" role="tab" aria-selected="' + (S.tab === id) + '" data-tab="' + id + '">' + esc(TITLE[id]) + "</button>";
-    });
-    h += "</div></div></div>";
+    h += "</div></div>";
 
     h += '<div class="wrap">';
     if (!S.ready) h += '<div class="empty">Loading\u2026</div>';
@@ -450,6 +468,21 @@
     }
     h += '<div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>';
     h += '<div class="toast" id="toast"></div>';
+
+    var NAV_ICONS = {
+      home: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+      fb1:  '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><text x="12" y="16" text-anchor="middle" font-size="10" font-weight="700" stroke="none" fill="currentColor">1</text></svg>',
+      fb2:  '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><text x="12" y="16" text-anchor="middle" font-size="10" font-weight="700" stroke="none" fill="currentColor">2</text></svg>',
+      fb3:  '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><text x="12" y="16" text-anchor="middle" font-size="10" font-weight="700" stroke="none" fill="currentColor">3</text></svg>',
+      cardio: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>',
+      history: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>'
+    };
+    var NAV_LABELS = { home: "Home", fb1: "Day 1", fb2: "Day 2", fb3: "Day 3", cardio: "Run", history: "History" };
+    h += '<nav class="bottomnav">';
+    ORDER.forEach(function (id) {
+      h += '<button class="nav-item' + (S.tab === id ? " active" : "") + '" data-tab="' + id + '">' + NAV_ICONS[id] + '<span>' + NAV_LABELS[id] + '</span></button>';
+    });
+    h += '</nav>';
 
     app.innerHTML = h;
     wire();
