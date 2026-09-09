@@ -53,14 +53,15 @@
     border-radius: 999px; padding: 4px 11px; font-size: 12.5px; cursor: pointer; font-family: inherit;
   }
   .tools button:hover { color: var(--text); border-color: var(--muted); }
-  .tabs { display: flex; gap: 4px; margin-top: 10px; overflow-x: auto; scrollbar-width: none; }
+  .tabs { display: flex; gap: 4px; margin-top: 10px; overflow-x: auto; scrollbar-width: none; background: rgba(255,255,255,.05); border-radius: 999px; padding: 3px; }
   .tabs::-webkit-scrollbar { display: none; }
   .tab {
-    flex: 0 0 auto; background: none; border: none; color: var(--muted);
-    font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
-    padding: 8px 12px 9px; border-bottom: 2px solid transparent; white-space: nowrap;
+    flex: 1; background: none; border: none; color: var(--muted);
+    font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+    padding: 7px 10px; border-radius: 999px; white-space: nowrap;
+    transition: color .15s, background .15s;
   }
-  .tab[aria-selected="true"] { color: var(--text); border-bottom-color: var(--gold); }
+  .tab[aria-selected="true"] { background: linear-gradient(135deg, #EDBA4A 0%, #C98E1E 100%); color: #1A1305; box-shadow: 0 2px 8px rgba(224,169,59,.35); }
   .tab:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 
   .meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 0 4px; flex-wrap: wrap; }
@@ -433,8 +434,9 @@
     h += '<div class="brandrow"><div class="brand">Training log <span>kg</span></div>';
     h += '<div class="tools"><button data-act="export">Export CSV</button><button data-act="import">Import</button></div></div>';
     h += '<div class="tabs" role="tablist">';
+    var TAB_LABEL = { home: "Home", fb1: "FB 1", fb2: "FB 2", fb3: "FB 3", cardio: "Run", history: "History" };
     ORDER.forEach(function (id) {
-      h += '<button class="tab" role="tab" aria-selected="' + (S.tab === id) + '" data-tab="' + id + '">' + esc(TITLE[id]) + "</button>";
+      h += '<button class="tab" role="tab" aria-selected="' + (S.tab === id) + '" data-tab="' + id + '">' + esc(TAB_LABEL[id]) + "</button>";
     });
     h += "</div></div></div>";
 
