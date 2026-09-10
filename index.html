@@ -421,8 +421,182 @@
     }
   };
 
+  var PROGRAM_TEMPLATES = {
+    "fb3day": { label: "Full Body 3-Day", days: 3, routineIds: ["fb1","fb2","fb3"],
+      dayLabels: { fb1: "Full Body 1", fb2: "Full Body 2", fb3: "Full Body 3" } },
+    "fb4day": { label: "Full Body 4-Day", days: 4, routineIds: ["fb1","fb2","fb3","fb4"],
+      dayLabels: { fb1: "Full Body 1", fb2: "Full Body 2", fb3: "Full Body 3", fb4: "Full Body 4" } },
+    "fb5day": { label: "Full Body 5-Day", days: 5, routineIds: ["fb1","fb2","fb3","fb4","fb5"],
+      dayLabels: { fb1: "Full Body 1", fb2: "Full Body 2", fb3: "Full Body 3", fb4: "Full Body 4", fb5: "Full Body 5" } },
+    "ppl": { label: "Push / Pull / Legs", days: 3, routineIds: ["push","pull","legs"],
+      dayLabels: { push: "Push", pull: "Pull", legs: "Legs" },
+      routines: {
+        push: { label: "Push", note: "Compound press first, then isolation. Beat last week on the big lifts.",
+          blocks: [
+            { ex: [{ id: "bench", name: "Barbell Bench Press",
+              alts: ["Barbell Bench Press", "30° Incline Smith Machine Press"],
+              tempo: "3-0-1-0", cue: "Slow into the stretch. Increase weight each set.",
+              sets: [{ t: "5", r: 150 }, { t: "5", r: 150 }, { t: "5", r: 150 }, { t: "5+", r: 150 }] }]},
+            { ex: [{ id: "ohp", name: "Overhead Press",
+              alts: ["Overhead Press", "Dumbbell Shoulder Press", "Seated Smith Press"],
+              tempo: "3-0-1-0", cue: "Brace hard. Bar travels in a straight line.",
+              sets: [{ t: "8-10", r: 120 }, { t: "8-10", r: 120 }, { t: "8-10", r: 120 }] }]},
+            { ex: [{ id: "inclinedbp", name: "Incline Dumbbell Press", tempo: "3-0-1-0",
+              cue: "Control the descent. Full range.",
+              protocol: "Last set: rest-pause × 1",
+              sets: [{ t: "10-12", r: 90 }, { t: "10-12", r: 90 }, { t: "10-12", r: 90 }] }]},
+            { superset: "Superset — 3 rounds", ex: [
+              { id: "cablelat", name: "Cable Lateral Raise", tempo: "2-0-1-1",
+                cue: "Pause at the top. No swinging.",
+                sets: [{ t: "12-15", r: 60 }, { t: "12-15", r: 60 }, { t: "12-15", r: 60 }] },
+              { id: "tricepbar", name: "Tricep Pushdown", tempo: "2-0-1-1",
+                cue: "Elbows fixed. Full extension.",
+                sets: [{ t: "12-15", r: 60 }, { t: "12-15", r: 60 }, { t: "12-15", r: 60 }] }
+            ]}
+          ]
+        },
+        pull: { label: "Pull", note: "Full range on every pull. Straps on rows if you have them.",
+          blocks: [
+            { ex: [{ id: "barbellrow", name: "Barbell Row",
+              alts: ["Barbell Row", "T-Bar Row", "Dumbbell Row"],
+              tempo: "3-0-1-1", cue: "Control the descent. Pull to lower chest.",
+              sets: [{ t: "5", r: 150 }, { t: "5", r: 150 }, { t: "5", r: 150 }, { t: "5+", r: 150 }] }]},
+            { ex: [{ id: "latpull", name: "Lat Pulldown — Neutral Grip", tempo: "3-1-1-0",
+              cue: "3 seconds into the stretch. Strong pause at the bottom.",
+              sets: [{ t: "8-10", r: 120 }, { t: "8-10", r: 120 }, { t: "8-10", r: 120 }] }]},
+            { ex: [{ id: "seatedrow", name: "Seated Cable Row", tempo: "3-0-1-1",
+              cue: "Full shoulder stretch forward. Drive elbows back.",
+              sets: [{ t: "10-12", r: 90 }, { t: "10-12", r: 90 }, { t: "10-12", r: 90 }] }]},
+            { superset: "Superset — 3 rounds", ex: [
+              { id: "facepull", name: "Face Pull", tempo: "2-0-1-2",
+                cue: "Pull to forehead. Externally rotate at the end.",
+                sets: [{ t: "15-20", r: 60 }, { t: "15-20", r: 60 }, { t: "15-20", r: 60 }] },
+              { id: "dbcurl", name: "Dumbbell Curl", tempo: "2-0-1-1",
+                cue: "Supinate at the top. No swinging.",
+                sets: [{ t: "10-12", r: 60 }, { t: "10-12", r: 60 }, { t: "10-12", r: 60 }] }
+            ]}
+          ]
+        },
+        legs: { label: "Legs", note: "Depth first, weight second. Own every rep.",
+          blocks: [
+            { ex: [{ id: "squat", name: "Barbell Back Squat",
+              alts: ["Barbell Back Squat", "Goblet Squat", "Safety Bar Squat"],
+              tempo: "3-0-1-0", cue: "Knees track toes. Hip crease below parallel.",
+              sets: [{ t: "5", r: 180 }, { t: "5", r: 180 }, { t: "5", r: 180 }, { t: "5+", r: 180 }] }]},
+            { ex: [{ id: "rdl", name: "Romanian Deadlift", tempo: "3-0-1-0",
+              cue: "Feel the stretch at the bottom. Drive hips through.",
+              sets: [{ t: "8-10", r: 120 }, { t: "8-10", r: 120 }, { t: "8-10", r: 120 }] }]},
+            { ex: [{ id: "legpress", name: "Leg Press — Quad Focus", tempo: "3-0-1-0",
+              cue: "3 seconds down.", protocol: "Last set: rest-pause × 1",
+              sets: [{ t: "10-12", r: 150 }, { t: "10-12", r: 150 }, { t: "10-12", r: 150 }] }]},
+            { superset: "Superset — 3 rounds", ex: [
+              { id: "hamcurl", name: "Seated Hamstring Curl", tempo: "2-0-1-1",
+                cue: "Pause in stretch.",
+                sets: [{ t: "10-12", r: 90 }, { t: "10-12", r: 90 }, { t: "10-12", r: 90 }] },
+              { id: "calfraise", name: "Standing Calf Raise", tempo: "2-2-1-2",
+                cue: "Pause 2s top and bottom.",
+                sets: [{ t: "12-15", r: 120 }, { t: "12-15", r: 120 }] }
+            ]}
+          ]
+        }
+      }
+    },
+    "upper-lower": { label: "Upper / Lower", days: 4, routineIds: ["upper-a","lower-a","upper-b","lower-b"],
+      dayLabels: { "upper-a": "Upper A", "lower-a": "Lower A", "upper-b": "Upper B", "lower-b": "Lower B" },
+      routines: {
+        "upper-a": { label: "Upper A", note: "Strength focus. Add weight when you hit the top of the range for all sets.",
+          blocks: [
+            { ex: [{ id: "bench", name: "Barbell Bench Press",
+              alts: ["Barbell Bench Press", "30° Incline Smith Machine Press"],
+              tempo: "3-0-1-0", cue: "Slow into the stretch.",
+              sets: [{ t: "4-6", r: 180 }, { t: "4-6", r: 180 }, { t: "4-6", r: 180 }, { t: "4-6", r: 180 }] }]},
+            { ex: [{ id: "barbellrow", name: "Barbell Row",
+              alts: ["Barbell Row", "T-Bar Row"],
+              tempo: "3-0-1-1", cue: "Pull to lower chest.",
+              sets: [{ t: "4-6", r: 180 }, { t: "4-6", r: 180 }, { t: "4-6", r: 180 }, { t: "4-6", r: 180 }] }]},
+            { ex: [{ id: "ohp", name: "Overhead Press", tempo: "3-0-1-0",
+              cue: "Brace hard.",
+              sets: [{ t: "6-8", r: 150 }, { t: "6-8", r: 150 }, { t: "6-8", r: 150 }] }]},
+            { ex: [{ id: "latpull", name: "Lat Pulldown — Neutral Grip", tempo: "3-1-1-0",
+              cue: "3 seconds into the stretch.",
+              sets: [{ t: "8-10", r: 120 }, { t: "8-10", r: 120 }, { t: "8-10", r: 120 }] }]},
+            { ex: [{ id: "cslatraise", name: "Chest Supported DB Lateral Raise", tempo: "2-0-1-1",
+              cue: "Pause at the top.",
+              sets: [{ t: "12-15", r: 60 }, { t: "12-15", r: 60 }, { t: "12-15", r: 60 }] }]}
+          ]
+        },
+        "lower-a": { label: "Lower A", note: "Quad-dominant. Own the depth on squats.",
+          blocks: [
+            { ex: [{ id: "squat", name: "Barbell Back Squat",
+              alts: ["Barbell Back Squat", "Safety Bar Squat"],
+              tempo: "3-0-1-0", cue: "Hip crease below parallel.",
+              sets: [{ t: "4-6", r: 180 }, { t: "4-6", r: 180 }, { t: "4-6", r: 180 }, { t: "4-6", r: 180 }] }]},
+            { ex: [{ id: "rdl", name: "Romanian Deadlift", tempo: "3-0-1-0",
+              cue: "Hamstring stretch at the bottom.",
+              sets: [{ t: "8-10", r: 120 }, { t: "8-10", r: 120 }, { t: "8-10", r: 120 }] }]},
+            { ex: [{ id: "legpress", name: "Leg Press — Quad Focus", tempo: "3-0-1-0",
+              cue: "3 seconds down.", protocol: "Last set: rest-pause × 1",
+              sets: [{ t: "10-12", r: 150 }, { t: "10-12", r: 150 }, { t: "10-12", r: 150 }] }]},
+            { superset: "Superset — 3 rounds", ex: [
+              { id: "hamcurl", name: "Seated Hamstring Curl", tempo: "2-0-1-1",
+                cue: "Pause in stretch.",
+                sets: [{ t: "10-12", r: 90 }, { t: "10-12", r: 90 }, { t: "10-12", r: 90 }] },
+              { id: "calfraise", name: "Standing Calf Raise", tempo: "2-2-1-2",
+                cue: "Pause 2s top and bottom.",
+                sets: [{ t: "12-15", r: 120 }, { t: "12-15", r: 120 }] }
+            ]}
+          ]
+        },
+        "upper-b": { label: "Upper B", note: "Hypertrophy focus. Higher reps, squeeze every rep.",
+          blocks: [
+            { ex: [{ id: "inclinedbp", name: "Incline Dumbbell Press", tempo: "3-0-1-0",
+              cue: "Full range. Control the descent.",
+              sets: [{ t: "10-12", r: 90 }, { t: "10-12", r: 90 }, { t: "10-12", r: 90 }] }]},
+            { ex: [{ id: "seatedrow", name: "Seated Cable Row", tempo: "3-0-1-1",
+              cue: "Full stretch forward. Drive elbows back.",
+              sets: [{ t: "10-12", r: 90 }, { t: "10-12", r: 90 }, { t: "10-12", r: 90 }] }]},
+            { ex: [{ id: "pecfly", name: "Pec Fly", tempo: "3-0-1-0",
+              cue: "Slow into the stretch.", protocol: "Last set: rest-pause × 1",
+              sets: [{ t: "12-15", r: 60 }, { t: "12-15", r: 60 }, { t: "12-15", r: 60 }] }]},
+            { superset: "Superset — 3 rounds", ex: [
+              { id: "facepull", name: "Face Pull", tempo: "2-0-1-2",
+                cue: "Externally rotate at the end.",
+                sets: [{ t: "15-20", r: 60 }, { t: "15-20", r: 60 }, { t: "15-20", r: 60 }] },
+              { id: "inclinecurl", name: "Incline DB Curl", tempo: "3-0-1-1",
+                cue: "3 seconds down. Pause in squeeze.", protocol: "Last set: rest-pause × 1",
+                sets: [{ t: "10-12", r: 60 }, { t: "10-12", r: 60 }, { t: "10-12", r: 60 }] }
+            ]}
+          ]
+        },
+        "lower-b": { label: "Lower B", note: "Posterior chain focus. Feel the hip hinge and glute squeeze.",
+          blocks: [
+            { ex: [{ id: "rdl", name: "Romanian Deadlift", tempo: "3-0-1-0",
+              cue: "Hamstring stretch at the bottom. Drive hips through.",
+              sets: [{ t: "6-8", r: 150 }, { t: "6-8", r: 150 }, { t: "6-8", r: 150 }, { t: "6-8", r: 150 }] }]},
+            { ex: [{ id: "hipt", name: "Hip Thrust",
+              alts: ["Hip Thrust", "Glute Bridge", "45° Back Extension"],
+              tempo: "2-0-1-2", cue: "Squeeze at the top. Don't hyperextend.",
+              protocol: "Last set: rest-pause × 1",
+              sets: [{ t: "10-12", r: 90 }, { t: "10-12", r: 90 }, { t: "10-12", r: 90 }] }]},
+            { ex: [{ id: "bulgariansplit", name: "Bulgarian Split Squat — Quad Focus", perLeg: true,
+              tempo: "3-1-1-0", cue: "3 seconds down, 1 second pause.",
+              sets: [{ t: "8-10", r: 90 }, { t: "8-10", r: 90 }, { t: "8-10", r: 90 }] }]},
+            { superset: "Superset — 3 rounds", ex: [
+              { id: "legext", name: "Leg Extension", tempo: "2-0-1-1",
+                cue: "Strong pause at the top.",
+                sets: [{ t: "12-15", r: 60 }, { t: "12-15", r: 60 }, { t: "12-15", r: 60 }] },
+              { id: "calfraise", name: "Standing Calf Raise", tempo: "2-2-1-2",
+                cue: "Pause 2s top and bottom.",
+                sets: [{ t: "12-15", r: 120 }, { t: "12-15", r: 120 }] }
+            ]}
+          ]
+        }
+      }
+    }
+  };
+
   var ORDER = ["home", "fb1", "fb2", "fb3", "fb4", "fb5", "cardio", "history"];
-  var TITLE = { home: "Home", fb1: "Full Body 1", fb2: "Full Body 2", fb3: "Full Body 3", fb4: "Full Body 4", fb5: "Full Body 5", cardio: "Run / Other", history: "History" };
+  var TITLE = { home: "Home", fb1: "Full Body 1", fb2: "Full Body 2", fb3: "Full Body 3", fb4: "Full Body 4", fb5: "Full Body 5", push: "Push", pull: "Pull", legs: "Legs", "upper-a": "Upper A", "lower-a": "Lower A", "upper-b": "Upper B", "lower-b": "Lower B", cardio: "Run / Other", history: "History" };
   var SESSIONS_KEY = "wt:sessions:v1";
   var DRAFTS_KEY = "wt:drafts:v1";
   var PROGRAM_KEY = "wt:program:v2";
@@ -433,9 +607,36 @@
     var d = new Date(), p = function (n) { return (n < 10 ? "0" : "") + n; };
     return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
   }
+  function getRoutine(routineId) {
+    if (S.program && S.program.routineOverrides && S.program.routineOverrides[routineId])
+      return S.program.routineOverrides[routineId];
+    if (P[routineId]) return P[routineId];
+    var found = null;
+    Object.keys(PROGRAM_TEMPLATES).forEach(function (tid) {
+      var t = PROGRAM_TEMPLATES[tid];
+      if (t.routines && t.routines[routineId] && !found) found = t.routines[routineId];
+    });
+    return found;
+  }
   function eachEx(wid, fn) {
-    var w = P[wid]; if (!w) return;
+    var w = getRoutine(wid); if (!w) return;
     w.blocks.forEach(function (b) { b.ex.forEach(fn); });
+  }
+  function allRoutineIds() {
+    var ids = Object.keys(P);
+    Object.keys(PROGRAM_TEMPLATES).forEach(function (tid) {
+      var t = PROGRAM_TEMPLATES[tid];
+      if (t.routines) Object.keys(t.routines).forEach(function (rid) { if (ids.indexOf(rid) === -1) ids.push(rid); });
+    });
+    return ids;
+  }
+  function eachAllEx(fn) {
+    var seen = {};
+    allRoutineIds().forEach(function (wid) {
+      eachEx(wid, function (ex) {
+        if (!seen[ex.id]) { seen[ex.id] = true; fn(ex, wid); }
+      });
+    });
   }
   function blankDraft(id) {
     if (id === "cardio") return { date: todayISO(), kind: "Run", mins: "", km: "", notes: "" };
@@ -480,9 +681,22 @@
     return Math.max(1, diff + 1);
   }
   function activeOrder() {
-    var days = (S.program && S.program.days) || 3;
-    var wids = ["fb1", "fb2", "fb3", "fb4", "fb5"].slice(0, days);
+    var wids;
+    if (S.program && S.program.routineIds) {
+      wids = S.program.routineIds;
+    } else {
+      var days = (S.program && S.program.days) || 3;
+      wids = ["fb1", "fb2", "fb3", "fb4", "fb5"].slice(0, days);
+    }
     return ["home"].concat(wids).concat(["cardio", "history"]);
+  }
+  function activeRoutineLabel(routineId) {
+    if (S.program && S.program.routineIds) {
+      var tid = S.program.templateId;
+      if (tid && PROGRAM_TEMPLATES[tid] && PROGRAM_TEMPLATES[tid].dayLabels && PROGRAM_TEMPLATES[tid].dayLabels[routineId])
+        return PROGRAM_TEMPLATES[tid].dayLabels[routineId];
+    }
+    return TITLE[routineId] || routineId;
   }
   function draft(id) {
     if (!S.drafts[id]) S.drafts[id] = blankDraft(id);
@@ -524,10 +738,11 @@
     h += '<div class="brandrow"><div class="brand">Training log <span>kg</span></div>';
     h += '<div class="tools"><button data-act="export">Export CSV</button><button data-act="import">Import</button></div></div>';
     h += '<div class="tabs" role="tablist">';
-    var TAB_LABEL = { home: "Home", fb1: "FB 1", fb2: "FB 2", fb3: "FB 3", fb4: "FB 4", fb5: "FB 5", cardio: "Run", history: "History" };
+    var TAB_SHORT = { home: "Home", fb1: "FB 1", fb2: "FB 2", fb3: "FB 3", fb4: "FB 4", fb5: "FB 5", push: "Push", pull: "Pull", legs: "Legs", "upper-a": "Up A", "lower-a": "Lo A", "upper-b": "Up B", "lower-b": "Lo B", cardio: "Run", history: "History" };
     var curOrder = activeOrder();
     curOrder.forEach(function (id) {
-      h += '<button class="tab" role="tab" aria-selected="' + (S.tab === id) + '" data-tab="' + id + '">' + esc(TAB_LABEL[id]) + "</button>";
+      var lbl = TAB_SHORT[id] || activeRoutineLabel(id).split(" ").slice(0,2).join(" ");
+      h += '<button class="tab" role="tab" aria-selected="' + (S.tab === id) + '" data-tab="' + id + '">' + esc(lbl) + "</button>";
     });
     h += "</div></div></div>";
 
@@ -605,10 +820,16 @@
     if (S.program) {
       var wk = programWeek() || 1;
       var pct = Math.min(100, Math.round((wk / S.program.durationWeeks) * 100));
+      var blockSessions = S.sessions.filter(function (s) { return s.programName === S.program.name && s.type !== "skip"; }).length;
+      var startDt = S.program.startDate ? new Date(S.program.startDate + "T00:00:00") : null;
+      var daysIn = startDt ? Math.max(0, Math.floor((new Date() - startDt) / (24*60*60*1000))) : 0;
       h += '<div class="prog-bar-top"><div class="prog-bar-name">' + esc(S.program.name) + '</div>';
-      h += '<div class="prog-bar-wk">Week ' + wk + ' / ' + S.program.durationWeeks + '</div></div>';
+      h += '<div class="prog-bar-wk">Wk ' + wk + '/' + S.program.durationWeeks + '</div></div>';
       h += '<div class="prog-track"><div class="prog-fill" style="width:' + pct + '%"></div></div>';
-      h += '<div class="prog-actions"><button class="prog-btn" data-act="new-program">Switch Program</button></div>';
+      h += '<div style="display:flex;justify-content:space-between;margin-top:7px;font-size:11px;color:var(--muted)">';
+      h += '<span>' + blockSessions + ' session' + (blockSessions !== 1 ? 's' : '') + ' in block</span>';
+      h += '<span>Day ' + daysIn + '</span></div>';
+      h += '<div class="prog-actions"><button class="prog-btn" data-act="new-program">Switch Program</button><button class="prog-btn" data-act="edit-routine" style="display:none"></button></div>';
     } else {
       h += '<div class="prog-bar-top"><div class="prog-bar-name" style="color:var(--muted);font-weight:500;font-size:13px">No program set — track your training block here</div></div>';
       h += '<div class="prog-actions"><button class="prog-btn primary" data-act="new-program">+ Start a Program</button></div>';
@@ -620,8 +841,13 @@
     h += '<div class="home-datefield"><span>Log for</span><input type="date" id="home-date" value="' + esc(isoToday) + '"></div>';
 
     // Workout grid
-    var days = (S.program && S.program.days) || 3;
-    var wOrder = ["fb1","fb2","fb3","fb4","fb5"].slice(0, days).concat(["cardio"]);
+    var wOrder;
+    if (S.program && S.program.routineIds) {
+      wOrder = S.program.routineIds.concat(["cardio"]);
+    } else {
+      var days = (S.program && S.program.days) || 3;
+      wOrder = ["fb1","fb2","fb3","fb4","fb5"].slice(0, days).concat(["cardio"]);
+    }
     var sorted = S.sessions.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; });
     var lastWid = sorted.length ? (sorted[0].type === "cardio" ? "cardio" : sorted[0].workout) : null;
     var idx = lastWid ? wOrder.indexOf(lastWid) : -1;
@@ -641,12 +867,13 @@
 
       // Build last-weights preview for lifting days
       var weightsHtml = "";
-      if (wid !== "cardio" && P[wid]) {
+      if (wid !== "cardio" && getRoutine(wid)) {
         var lastSess = lifts().filter(function (s) { return s.workout === wid; })
           .sort(function (a, b) { return a.date < b.date ? 1 : -1; })[0];
         if (lastSess && lastSess.entries) {
           var exLines = [], exCount = 0;
-          (P[wid].blocks || []).forEach(function (b) {
+          var rw = getRoutine(wid);
+          (rw.blocks || []).forEach(function (b) {
             b.ex.forEach(function (ex) {
               if (exCount >= 2) return;
               var sets = lastSess.entries[ex.id];
@@ -680,8 +907,7 @@
 
     // Recent PRs
     var prs = [], seenPR = {};
-    Object.keys(P).forEach(function (wid) {
-      eachEx(wid, function (ex) {
+    eachAllEx(function (ex) {
         if (seenPR[ex.id]) return;
         seenPR[ex.id] = true;
         var best = bestE1RM(ex.id);
@@ -690,7 +916,6 @@
         if (series.length > 0 && Math.abs(series[series.length - 1].v - best) < 0.1) {
           prs.push({ name: ex.name, val: best });
         }
-      });
     });
     if (prs.length) {
       h += '<div class="home-section">RECENT PRs</div>';
@@ -704,8 +929,9 @@
   }
 
   function renderWorkout(wid) {
-    var w = P[wid], d = draft(wid), h = "";
-    h += '<div class="meta"><div class="meta-note">' + esc(w.note) + "</div>";
+    var w = getRoutine(wid), d = draft(wid), h = "";
+    if (!w) return '<div style="padding:20px;color:var(--muted)">No routine found for this tab.</div>';
+    h += '<div class="meta"><div class="meta-note">' + esc(w.note || "") + "</div>";
     h += '<div class="datefield"><span>Date</span><input type="date" data-field="date" value="' + esc(d.date) + '"></div></div>';
     w.blocks.forEach(function (b) {
       if (b.superset) {
@@ -797,7 +1023,7 @@
     var h = "";
 
     // Sub-tab bar
-    var subTabs = [["sessions","Sessions"],["records","Records"],["charts","Charts"]];
+    var subTabs = [["sessions","Sessions"],["records","Records"],["charts","Charts"],["programs","Programs"]];
     h += '<div class="sub-tabs">';
     subTabs.forEach(function (t) {
       h += '<button class="sub-tab' + (S.histTab === t[0] ? " on" : "") + '" data-htab="' + t[0] + '">' + t[1] + "</button>";
@@ -834,8 +1060,7 @@
     else if (S.histTab === "records") {
       var records = [];
       var seenR = {};
-      Object.keys(P).forEach(function (wid) {
-        eachEx(wid, function (ex) {
+      eachAllEx(function (ex) {
           if (seenR[ex.id]) return;
           seenR[ex.id] = true;
           var best = bestE1RM(ex.id);
@@ -844,7 +1069,6 @@
           var topSet = "";
           if (series.length) topSet = series[series.length - 1].note;
           records.push({ name: ex.name, val: best, set: topSet });
-        });
       });
       records.sort(function (a, b) { return b.val - a.val; });
       if (!records.length) {
@@ -863,8 +1087,7 @@
     else if (S.histTab === "charts") {
       var seenC = {};
       var hasChart = false;
-      Object.keys(P).forEach(function (wid) {
-        eachEx(wid, function (ex) {
+      eachAllEx(function (ex) {
           if (seenC[ex.id]) return;
           seenC[ex.id] = true;
           var data = seriesFor(ex.id);
@@ -890,10 +1113,48 @@
           h += '<text x="' + pad + '" y="' + (H - 8) + '" fill="#8A97A6" font-size="11">' + esc(data[0].date) + "</text>";
           h += '<text x="' + (W - pad) + '" y="' + (H - 8) + '" fill="#8A97A6" font-size="11" text-anchor="end">' + esc(data[data.length - 1].date) + "</text>";
           h += "</svg></div>";
-        });
       });
       if (!hasChart) {
         h += '<div class="no-data">Log at least two sessions per exercise to see trend charts here.</div>';
+      }
+    }
+
+    else if (S.histTab === "programs") {
+      var progMap = {}, progOrder = [];
+      S.sessions.forEach(function (s) {
+        if (s.type === "skip" || !s.programName) return;
+        if (!progMap[s.programName]) { progMap[s.programName] = []; progOrder.push(s.programName); }
+        progMap[s.programName].push(s);
+      });
+      if (S.program && !progMap[S.program.name]) {
+        progMap[S.program.name] = [];
+        progOrder.push(S.program.name);
+      }
+      if (!progOrder.length) {
+        h += '<div class="no-data">Start a program to track your training blocks here.</div>';
+      } else {
+        progOrder.slice().reverse().forEach(function (pname) {
+          var psessions = progMap[pname];
+          var isCurrent = S.program && S.program.name === pname;
+          var wkLabel = isCurrent && S.program.durationWeeks ? ("Wk " + (programWeek() || 1) + "/" + S.program.durationWeeks) : (psessions.length + " sessions");
+          h += '<div class="hist" style="margin-top:12px">';
+          h += '<div class="hist-head" style="cursor:default">';
+          h += '<div class="hist-w">' + esc(pname) + (isCurrent ? ' <span style="font-size:10px;color:var(--gold);font-weight:700">ACTIVE</span>' : '') + '</div>';
+          h += '<div class="hist-d">' + esc(wkLabel) + '</div></div>';
+          if (psessions.length) {
+            h += '<div class="hist-body" style="display:block">';
+            var wCounts = {};
+            psessions.forEach(function (s) { wCounts[s.workout] = (wCounts[s.workout] || 0) + 1; });
+            Object.keys(wCounts).forEach(function (wid) {
+              h += '<div><b>' + esc(TITLE[wid] || wid) + '</b>: ' + wCounts[wid] + ' session' + (wCounts[wid] !== 1 ? 's' : '') + '</div>';
+            });
+            var firstDate = psessions.map(function(s){return s.date;}).sort()[0];
+            var lastDate = psessions.map(function(s){return s.date;}).sort().reverse()[0];
+            h += '<div style="color:var(--muted);font-size:12px;margin-top:4px">' + esc(firstDate) + ' → ' + esc(lastDate) + '</div>';
+            h += '</div>';
+          }
+          h += '</div>';
+        });
       }
     }
 
@@ -902,7 +1163,7 @@
 
   function showChart(exId) {
     var data = seriesFor(exId), name = exId;
-    Object.keys(P).forEach(function (w) { eachEx(w, function (ex) { if (ex.id === exId) name = ex.name; }); });
+    eachAllEx(function (ex) { if (ex.id === exId) name = ex.name; });
     var body;
     if (data.length < 2) {
       body = "<p>Two logged sessions needed to draw a trend. You have " + data.length + ".</p>";
@@ -1009,11 +1270,9 @@
   function findWid(label) { var o = null; Object.keys(TITLE).forEach(function (k) { if (TITLE[k] === label) o = k; }); return o; }
   function findExId(name) {
     var o = null;
-    Object.keys(P).forEach(function (w) {
-      eachEx(w, function (ex) {
-        if (ex.name === name) o = ex.id;
-        if (ex.alts && ex.alts.indexOf(name) > -1) o = ex.id;
-      });
+    eachAllEx(function (ex) {
+      if (ex.name === name) o = ex.id;
+      if (ex.alts && ex.alts.indexOf(name) > -1) o = ex.id;
     });
     return o;
   }
@@ -1097,38 +1356,72 @@
     S.sessions.forEach(function (s) { if (s.programName && !seen[s.programName]) { seen[s.programName] = true; count++; } });
     if (S.program && !seen[S.program.name]) count++;
     var defaultName = "Block " + (count + 1);
-    var curDays = (S.program && S.program.days) || 3;
     var curWeeks = (S.program && S.program.durationWeeks) || 8;
+    var selTemplate = (S.program && S.program.templateId) || "fb3day";
 
-    var h = '<h3>' + (S.program ? "Switch Program" : "Start a Program") + '</h3>';
-    h += '<p>Give your new training block a name, pick how many days a week you train, and set a target duration. Your history stays intact.</p>';
-    h += '<div class="field"><label>Program name</label><input id="np-name" type="text" value="' + esc(defaultName) + '" placeholder="e.g. Full Body Block 2"></div>';
-    h += '<div class="two">';
-    h += '<div class="field"><label>Duration (weeks)</label><input id="np-weeks" type="number" min="1" max="52" value="' + curWeeks + '"></div>';
-    h += '<div class="field"><label>Days per week</label><select id="np-days">';
-    [3, 4, 5].forEach(function (d) { h += '<option value="' + d + '"' + (d === curDays ? " selected" : "") + ">" + d + " days</option>"; });
-    h += "</select></div></div>";
-    h += '<div class="field"><label>Start date</label><input id="np-start" type="date" value="' + esc(todayISO()) + '"></div>';
-    h += '<button class="save" style="width:100%;margin-top:14px" id="np-save">Start Program \u2192</button>';
-    h += '<button class="close" data-act="close">Cancel</button>';
+    var templateList = [
+      { id: "fb3day", label: "Full Body 3\u00d7", desc: "3 days/wk \u2014 classic FB rotation" },
+      { id: "fb4day", label: "Full Body 4\u00d7", desc: "4 days/wk \u2014 extra volume" },
+      { id: "fb5day", label: "Full Body 5\u00d7", desc: "5 days/wk \u2014 high frequency" },
+      { id: "ppl",    label: "Push / Pull / Legs", desc: "6 days/wk \u2014 PPL split" },
+      { id: "upper-lower", label: "Upper / Lower", desc: "4 days/wk \u2014 U/L split" }
+    ];
 
-    document.getElementById("sheet").innerHTML = h;
-    document.getElementById("modal").classList.add("on");
-    document.getElementById("np-save").onclick = function () {
-      var name = (document.getElementById("np-name").value || "").trim() || defaultName;
-      var weeks = Math.max(1, parseInt(document.getElementById("np-weeks").value, 10) || 8);
-      var days = parseInt(document.getElementById("np-days").value, 10) || 3;
-      var start = document.getElementById("np-start").value || todayISO();
-      S.program = { name: name, startDate: start, durationWeeks: weeks, days: days };
-      S.homeSelected = null;
-      var validTabs = ["home"].concat(["fb1","fb2","fb3","fb4","fb5"].slice(0, days)).concat(["cardio","history"]);
-      if (validTabs.indexOf(S.tab) === -1) S.tab = "home";
-      saveProgram().then(function () {
-        document.getElementById("modal").classList.remove("on");
-        render();
-        toast("Program started: " + name);
+    function buildModal(selectedId) {
+      var h = '<h3>' + (S.program ? "Switch Program" : "Start a Program") + '</h3>';
+      h += '<p style="font-size:13px;color:var(--muted);margin-top:-4px;margin-bottom:14px">Choose a template, give it a name, and begin.</p>';
+      h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">';
+      templateList.forEach(function (t) {
+        var isSel = t.id === selectedId;
+        h += '<div class="tpl-card' + (isSel ? ' tpl-sel' : '') + '" data-tpl="' + t.id + '" style="' +
+          'border:1.5px solid ' + (isSel ? 'var(--gold)' : 'var(--line)') + ';' +
+          'border-radius:10px;padding:10px 12px;cursor:pointer;background:' + (isSel ? 'rgba(224,169,59,.1)' : 'var(--panel)') + '">';
+        h += '<div style="font-size:13px;font-weight:700;color:' + (isSel ? 'var(--gold)' : 'var(--text)') + '">' + esc(t.label) + '</div>';
+        h += '<div style="font-size:11.5px;color:var(--muted);margin-top:2px">' + esc(t.desc) + '</div>';
+        h += '</div>';
       });
-    };
+      h += '</div>';
+      h += '<div class="field"><label>Block name</label><input id="np-name" type="text" value="' + esc(defaultName) + '" placeholder="e.g. PPL Block 1"></div>';
+      h += '<div class="two">';
+      h += '<div class="field"><label>Duration (weeks)</label><input id="np-weeks" type="number" min="1" max="52" value="' + curWeeks + '"></div>';
+      h += '<div class="field"><label>Start date</label><input id="np-start" type="date" value="' + esc(todayISO()) + '"></div>';
+      h += '</div>';
+      h += '<button class="save" style="width:100%;margin-top:14px" id="np-save">Start Program \u2192</button>';
+      h += '<button class="close" data-act="close" style="display:block;width:100%;margin-top:8px;text-align:center">Cancel</button>';
+      return h;
+    }
+
+    function mount(selectedId) {
+      document.getElementById("sheet").innerHTML = buildModal(selectedId);
+      document.querySelectorAll("[data-tpl]").forEach(function (card) {
+        card.onclick = function () { mount(card.dataset.tpl); };
+      });
+      document.getElementById("np-save").onclick = function () {
+        var name = (document.getElementById("np-name").value || "").trim() || defaultName;
+        var weeks = Math.max(1, parseInt(document.getElementById("np-weeks").value, 10) || 8);
+        var start = document.getElementById("np-start").value || todayISO();
+        var tpl = PROGRAM_TEMPLATES[selectedId];
+        var routineIds = tpl ? (tpl.routineIds || Object.keys(tpl.routines || {})) : null;
+        if (!routineIds || !routineIds.length) {
+          var dayMap = { fb3day: 3, fb4day: 4, fb5day: 5 };
+          var days = dayMap[selectedId] || 3;
+          routineIds = ["fb1","fb2","fb3","fb4","fb5"].slice(0, days);
+        }
+        S.program = { name: name, startDate: start, durationWeeks: weeks, templateId: selectedId, routineIds: routineIds, days: routineIds.length };
+        S.homeSelected = null;
+        var validTabs = ["home"].concat(routineIds).concat(["cardio","history"]);
+        if (validTabs.indexOf(S.tab) === -1) S.tab = "home";
+        saveProgram().then(function () {
+          document.getElementById("modal").classList.remove("on");
+          render();
+          toast("Program started: " + name);
+        });
+      };
+      wireActs();
+    }
+
+    document.getElementById("modal").classList.add("on");
+    mount(selTemplate);
   }
 
   function wireActs() {
