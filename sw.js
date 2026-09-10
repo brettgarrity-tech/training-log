@@ -1,4 +1,4 @@
-var CACHE = "training-log-v6";
+var CACHE = "training-log-v7";
 var ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", function (e) {
