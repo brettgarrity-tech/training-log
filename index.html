@@ -592,11 +592,68 @@
           ]
         }
       }
+    },
+    "fb3v2": { label: "Full Body 3-Day Split V2", days: 3, routineIds: ["fb3v2-d1","fb3v2-d2","fb3v2-d3"],
+      dayLabels: { "fb3v2-d1": "Day 1", "fb3v2-d2": "Day 2", "fb3v2-d3": "Day 3" },
+      routines: {
+        "fb3v2-d1": { label: "Day 1 — Full Body", note: "Squat and press first. Rest 90 s between all sets.",
+          blocks: [
+            { ex: [{ id: "squat", name: "Barbell Back Squat", tempo: "3-0-1-0",
+              sets: [{t:"8",r:90},{t:"8",r:90},{t:"8",r:90},{t:"8",r:90}] }]},
+            { ex: [{ id: "bench", name: "Barbell Bench Press", tempo: "3-0-1-0",
+              sets: [{t:"8",r:90},{t:"8",r:90},{t:"8",r:90},{t:"8",r:90}] }]},
+            { ex: [{ id: "barbellrow", name: "Barbell Row", tempo: "2-0-1-0",
+              sets: [{t:"10",r:90},{t:"10",r:90},{t:"10",r:90},{t:"10",r:90}] }]},
+            { ex: [{ id: "ohp", name: "Shoulder Press", tempo: "3-0-1-0",
+              sets: [{t:"10",r:90},{t:"10",r:90},{t:"10",r:90}] }]},
+            { superset: "Arms", ex: [
+              { id: "bicepcurl", name: "Bicep Curl", tempo: "2-0-1-1",
+                sets: [{t:"12",r:90},{t:"12",r:90},{t:"12",r:90}] },
+              { id: "tricepbar", name: "Tricep Pushdown", tempo: "2-0-1-1",
+                sets: [{t:"12",r:90},{t:"12",r:90},{t:"12",r:90}] }
+            ]}
+          ]
+        },
+        "fb3v2-d2": { label: "Day 2 — Full Body", note: "Hip hinge focus. Keep back flat on RDL.",
+          blocks: [
+            { ex: [{ id: "rdl", name: "Romanian Deadlift", tempo: "3-0-1-0",
+              sets: [{t:"8",r:90},{t:"8",r:90},{t:"8",r:90},{t:"8",r:90}] }]},
+            { ex: [{ id: "inclinedbp", name: "Incline Dumbbell Press", tempo: "3-0-1-0",
+              sets: [{t:"10",r:90},{t:"10",r:90},{t:"10",r:90},{t:"10",r:90}] }]},
+            { ex: [{ id: "latpull", name: "Lat Pulldown", tempo: "3-1-1-0",
+              sets: [{t:"10",r:90},{t:"10",r:90},{t:"10",r:90},{t:"10",r:90}] }]},
+            { ex: [{ id: "lateralraise", name: "Lateral Raises", tempo: "2-0-1-1",
+              sets: [{t:"12",r:90},{t:"12",r:90},{t:"12",r:90}] }]},
+            { superset: "Arms", ex: [
+              { id: "hammercurl", name: "Hammer Curl", tempo: "2-0-1-1",
+                sets: [{t:"12",r:90},{t:"12",r:90},{t:"12",r:90}] },
+              { id: "skullcrush", name: "Skull Crushers", tempo: "3-0-1-0",
+                sets: [{t:"12",r:90},{t:"12",r:90},{t:"12",r:90}] }
+            ]}
+          ]
+        },
+        "fb3v2-d3": { label: "Day 3 — Full Body", note: "Machine and cable day. Control every rep.",
+          blocks: [
+            { ex: [{ id: "legpress", name: "Leg Press", tempo: "3-0-1-0",
+              sets: [{t:"10",r:90},{t:"10",r:90},{t:"10",r:90},{t:"10",r:90}] }]},
+            { ex: [{ id: "seatedrow", name: "Cable Row", tempo: "3-0-1-1",
+              sets: [{t:"10",r:90},{t:"10",r:90},{t:"10",r:90},{t:"10",r:90}] }]},
+            { ex: [{ id: "dbohp", name: "Dumbbell Shoulder Press", tempo: "3-0-1-0",
+              sets: [{t:"10",r:90},{t:"10",r:90},{t:"10",r:90}] }]},
+            { ex: [{ id: "hamcurl", name: "Leg Curl", tempo: "2-0-1-1",
+              sets: [{t:"12",r:90},{t:"12",r:90},{t:"12",r:90}] }]},
+            { ex: [{ id: "facepull", name: "Face Pulls", tempo: "2-0-1-2",
+              sets: [{t:"15",r:90},{t:"15",r:90},{t:"15",r:90}] }]},
+            { ex: [{ id: "calfraise", name: "Calf Raises", tempo: "2-2-1-2",
+              sets: [{t:"15",r:90},{t:"15",r:90},{t:"15",r:90},{t:"15",r:90}] }]}
+          ]
+        }
+      }
     }
   };
 
-  var ORDER = ["home", "fb1", "fb2", "fb3", "fb4", "fb5", "cardio", "history"];
-  var TITLE = { home: "Home", fb1: "Full Body 1", fb2: "Full Body 2", fb3: "Full Body 3", fb4: "Full Body 4", fb5: "Full Body 5", push: "Push", pull: "Pull", legs: "Legs", "upper-a": "Upper A", "lower-a": "Lower A", "upper-b": "Upper B", "lower-b": "Lower B", cardio: "Run / Other", history: "History" };
+  var ORDER = ["home", "fb1", "fb2", "fb3", "fb4", "fb5", "cardio", "cindy", "history"];
+  var TITLE = { home: "Home", fb1: "Full Body 1", fb2: "Full Body 2", fb3: "Full Body 3", fb4: "Full Body 4", fb5: "Full Body 5", push: "Push", pull: "Pull", legs: "Legs", "upper-a": "Upper A", "lower-a": "Lower A", "upper-b": "Upper B", "lower-b": "Lower B", "fb3v2-d1": "Day 1", "fb3v2-d2": "Day 2", "fb3v2-d3": "Day 3", cardio: "Run / Other", cindy: "Cindy", history: "History" };
   var SESSIONS_KEY = "wt:sessions:v1";
   var DRAFTS_KEY = "wt:drafts:v1";
   var PROGRAM_KEY = "wt:program:v2";
@@ -640,6 +697,7 @@
   }
   function blankDraft(id) {
     if (id === "cardio") return { date: todayISO(), kind: "Run", mins: "", km: "", notes: "" };
+    if (id === "cindy") return { date: todayISO(), rounds: "", notes: "" };
     var d = { date: todayISO(), entries: {}, variant: {} };
     eachEx(id, function (ex) { d.entries[ex.id] = ex.sets.map(function () { return { w: "", r: "" }; }); });
     return d;
@@ -688,7 +746,7 @@
       var days = (S.program && S.program.days) || 3;
       wids = ["fb1", "fb2", "fb3", "fb4", "fb5"].slice(0, days);
     }
-    return ["home"].concat(wids).concat(["cardio", "history"]);
+    return ["home"].concat(wids).concat(["cardio", "cindy", "history"]);
   }
   function activeRoutineLabel(routineId) {
     if (S.program && S.program.routineIds) {
@@ -738,7 +796,7 @@
     h += '<div class="brandrow"><div class="brand">Training log <span>kg</span></div>';
     h += '<div class="tools"><button data-act="export">Export CSV</button><button data-act="import">Import</button></div></div>';
     h += '<div class="tabs" role="tablist">';
-    var TAB_SHORT = { home: "Home", fb1: "FB 1", fb2: "FB 2", fb3: "FB 3", fb4: "FB 4", fb5: "FB 5", push: "Push", pull: "Pull", legs: "Legs", "upper-a": "Up A", "lower-a": "Lo A", "upper-b": "Up B", "lower-b": "Lo B", cardio: "Run", history: "History" };
+    var TAB_SHORT = { home: "Home", fb1: "FB 1", fb2: "FB 2", fb3: "FB 3", fb4: "FB 4", fb5: "FB 5", push: "Push", pull: "Pull", legs: "Legs", "upper-a": "Up A", "lower-a": "Lo A", "upper-b": "Up B", "lower-b": "Lo B", "fb3v2-d1": "Day 1", "fb3v2-d2": "Day 2", "fb3v2-d3": "Day 3", cardio: "Run", cindy: "Cindy", history: "History" };
     var curOrder = activeOrder();
     curOrder.forEach(function (id) {
       var lbl = TAB_SHORT[id] || activeRoutineLabel(id).split(" ").slice(0,2).join(" ");
@@ -751,6 +809,7 @@
     else if (S.tab === "home") h += renderHome();
     else if (S.tab === "history") h += renderHistory();
     else if (S.tab === "cardio") h += renderCardio();
+    else if (S.tab === "cindy") h += renderCindy();
     else h += renderWorkout(S.tab);
     if (S.ready && Store.mode === "memory") {
       h += '<div class="warn">Storage is blocked in this browser, so nothing will survive a refresh. Export a CSV before you close the tab.</div>';
@@ -770,7 +829,7 @@
   }
 
   function renderHome() {
-    var TAB_SHORT = { fb1: "FB1", fb2: "FB2", fb3: "FB3", fb4: "FB4", fb5: "FB5", cardio: "RUN" };
+    var TAB_SHORT = { fb1: "FB1", fb2: "FB2", fb3: "FB3", fb4: "FB4", fb5: "FB5", "fb3v2-d1": "Day 1", "fb3v2-d2": "Day 2", "fb3v2-d3": "Day 3", push: "Push", pull: "Pull", legs: "Legs", "upper-a": "Up A", "lower-a": "Lo A", "upper-b": "Up B", "lower-b": "Lo B", cardio: "Run", cindy: "Cindy", history: "History" };
     var h = "";
 
     // This week strip
@@ -905,6 +964,18 @@
     h += "</div>";
     h += '<div class="skip-row">Not doing <b>' + esc(TITLE[nextWid]) + '</b> today? <button class="skip-btn" data-act="skip-rotation" data-skip-wid="' + nextWid + '">Skip it →</button></div>';
 
+    // Bonus workouts (Cindy)
+    h += '<div class="home-section">BONUS</div>';
+    var cindyLast = S.sessions.filter(function(s){ return s.type === "cindy"; }).sort(function(a,b){ return a.date < b.date ? 1 : -1; })[0];
+    var cindyBest = S.sessions.filter(function(s){ return s.type === "cindy"; }).reduce(function(best,s){ return (+s.rounds||0) > (+best.rounds||0) ? s : best; }, { rounds: 0 });
+    h += '<div class="workout-grid">';
+    h += '<div class="workout-option" style="grid-column:1/-1" data-select="cindy">';
+    h += '<div class="workout-option-name">Cindy</div>';
+    h += '<div class="wo-weights" style="font-size:12px">5 pull-ups &nbsp;·&nbsp; 10 push-ups &nbsp;·&nbsp; 15 air squats &nbsp;·&nbsp; <b>AMRAP 20 min</b>' + (+cindyBest.rounds > 0 ? ' &nbsp;·&nbsp; PB: <b style="color:var(--gold)">' + esc(cindyBest.rounds) + ' rounds</b>' : '') + '</div>';
+    h += '<div class="workout-option-last">' + (cindyLast ? 'Last ' + esc(cindyLast.date) : 'Not done yet') + '</div>';
+    h += '<button class="workout-option-btn" data-go="cindy">Start →</button>';
+    h += '</div></div>';
+
     // Recent PRs
     var prs = [], seenPR = {};
     eachAllEx(function (ex) {
@@ -1019,7 +1090,36 @@
     return h;
   }
 
-  function renderHistory() {
+  function renderCindy() {
+    var d = draft("cindy");
+    var h = '<div class="meta">';
+    h += '<div class="meta-note">AMRAP 20 minutes. Each round: 5 pull-ups → 10 push-ups → 15 air squats. Log total complete rounds when you're done.</div>';
+    h += '<div class="datefield"><span>Date</span><input type="date" data-field="date" value="' + esc(d.date) + '"></div></div>';
+    h += '<div class="ex">';
+    h += '<div class="ex-head"><div><div class="ex-name">Cindy</div><div class="ex-sub">AMRAP · 20 minutes</div></div></div>';
+    h += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px">';
+    h += '<div style="text-align:center;padding:14px 8px;background:var(--panel-2);border-radius:10px"><div style="font-size:26px;font-weight:800;color:var(--gold)">5</div><div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.3">Pull-ups</div></div>';
+    h += '<div style="text-align:center;padding:14px 8px;background:var(--panel-2);border-radius:10px"><div style="font-size:26px;font-weight:800;color:var(--gold)">10</div><div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.3">Push-ups</div></div>';
+    h += '<div style="text-align:center;padding:14px 8px;background:var(--panel-2);border-radius:10px"><div style="font-size:26px;font-weight:800;color:var(--gold)">15</div><div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.3">Air Squats</div></div>';
+    h += '</div></div>';
+    h += '<div class="ex">';
+    h += '<div class="field"><label>Rounds completed</label>';
+    h += '<input inputmode="numeric" type="number" min="0" data-field="rounds" value="' + esc(d.rounds) + '" placeholder="e.g. 18" style="font-size:32px;font-weight:800;text-align:center;color:var(--gold);background:var(--panel-2);border:none;border-radius:10px;width:100%;padding:16px 0"></div>';
+    h += '<div class="field" style="margin-top:8px"><label>Notes</label><textarea data-field="notes" placeholder="Scaling used, how it felt…" rows="3">' + esc(d.notes) + '</textarea></div>';
+    h += '</div>';
+    var past = S.sessions.filter(function (s) { return s.type === "cindy"; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+    if (past.length) {
+      h += '<div class="group-label">Previous scores</div>';
+      past.slice(0, 5).forEach(function (s) {
+        var best = past.reduce(function (a, b) { return (+b.rounds || 0) > (+a.rounds || 0) ? b : a; }, past[0]);
+        var isBest = s.id === best.id;
+        h += '<div class="hist"><div class="hist-head"><div class="hist-w">Cindy &nbsp;·&nbsp; <b>' + esc(s.rounds || "?") + '</b> rounds' + (isBest ? ' <span style="color:var(--gold);font-size:10px;font-weight:800">★ PR</span>' : '') + '</div><div class="hist-d">' + esc(s.date) + '</div></div></div>';
+      });
+    }
+    return h;
+  }
+
+
     var h = "";
 
     // Sub-tab bar
@@ -1039,11 +1139,14 @@
       list.forEach(function (s) {
         h += '<div class="hist"><div class="hist-head" data-open="' + esc(s.id) + '">';
         var progTag = s.programName ? '<span style="color:var(--muted);font-size:11px;font-weight:500"> · ' + esc(s.programName) + '</span>' : '';
-        h += '<div class="hist-w">' + esc(s.type === "cardio" ? s.kind : (TITLE[s.workout] || s.workout)) + progTag + "</div>";
+        h += '<div class="hist-w">' + esc(s.type === "cardio" ? s.kind : s.type === "cindy" ? "Cindy" : (TITLE[s.workout] || s.workout)) + progTag + "</div>";
         h += '<div class="hist-d">' + esc(s.date) + "</div></div>";
         h += '<div class="hist-body" id="hb-' + esc(s.id) + '">';
         if (s.type === "cardio") {
           h += "<div>" + esc(s.mins || "?") + " min" + (s.km ? " \u00b7 " + esc(s.km) + " km" : "") + "</div>";
+          if (s.notes) h += "<div>" + esc(s.notes) + "</div>";
+        } else if (s.type === "cindy") {
+          h += "<div><b>Cindy</b> \u2014 " + esc(s.rounds || "?") + " rounds in 20 min</div>";
           if (s.notes) h += "<div>" + esc(s.notes) + "</div>";
         } else {
           Object.keys(s.entries).forEach(function (k) {
@@ -1330,6 +1433,9 @@
     if (wid === "cardio") {
       if (!d.mins) { toast("Add a duration first"); return; }
       S.sessions.push({ id: "s" + Date.now(), type: "cardio", date: d.date, kind: d.kind, mins: d.mins, km: d.km, notes: d.notes, programName: S.program ? S.program.name : undefined });
+    } else if (wid === "cindy") {
+      if (!d.rounds) { toast("Log your rounds first"); return; }
+      S.sessions.push({ id: "s" + Date.now(), type: "cindy", workout: "cindy", date: d.date, rounds: d.rounds, notes: d.notes || "", programName: S.program ? S.program.name : undefined });
     } else {
       var any = false;
       Object.keys(d.entries).forEach(function (k) { d.entries[k].forEach(function (st) { if (st.w && st.r) any = true; }); });
@@ -1361,10 +1467,11 @@
 
     var templateList = [
       { id: "fb3day", label: "Full Body 3\u00d7", desc: "3 days/wk \u2014 classic FB rotation" },
+      { id: "fb3v2",  label: "Full Body 3\u00d7 V2", desc: "3 days/wk \u2014 your custom split" },
       { id: "fb4day", label: "Full Body 4\u00d7", desc: "4 days/wk \u2014 extra volume" },
       { id: "fb5day", label: "Full Body 5\u00d7", desc: "5 days/wk \u2014 high frequency" },
-      { id: "ppl",    label: "Push / Pull / Legs", desc: "6 days/wk \u2014 PPL split" },
-      { id: "upper-lower", label: "Upper / Lower", desc: "4 days/wk \u2014 U/L split" }
+      { id: "ppl",    label: "Push / Pull / Legs", desc: "PPL split" },
+      { id: "upper-lower", label: "Upper / Lower", desc: "U/L split" }
     ];
 
     function buildModal(selectedId) {
