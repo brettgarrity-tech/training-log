@@ -758,7 +758,7 @@
   }
   function draft(id) {
     if (!S.drafts[id]) S.drafts[id] = blankDraft(id);
-    if (id !== "cardio" && !S.drafts[id].entries) S.drafts[id] = blankDraft(id);
+    if (id !== "cardio" && id !== "cindy" && !S.drafts[id].entries) S.drafts[id] = blankDraft(id);
     return S.drafts[id];
   }
 
