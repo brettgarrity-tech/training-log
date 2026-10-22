@@ -1092,28 +1092,52 @@
 
   function renderCindy() {
     var d = draft("cindy");
-    var h = '<div class="meta">';
-    h += '<div class="meta-note">AMRAP 20 minutes. Each round: 5 pull-ups → 10 push-ups → 15 air squats. Log total complete rounds when done.</div>';
+    var rounds = parseInt(d.rounds, 10) || 0;
+    var clockTxt = formatCindyClock();
+    var clockColor = CT.running ? "var(--gold)" : (CT.end && Math.round((CT.end - Date.now()) / 1000) <= 0 ? "var(--muted)" : "var(--gold)");
+    var btnLabel = CT.running ? "⏸ Pause" : (CT.end > 0 && Math.round((CT.end - Date.now()) / 1000) > 0 ? "▶ Resume" : "▶ Start 20 min");
+    var h = '';
+
+    // Date
+    h += '<div class="meta" style="margin-bottom:0">';
     h += '<div class="datefield"><span>Date</span><input type="date" data-field="date" value="' + esc(d.date) + '"></div></div>';
+
+    // Movement tiles
     h += '<div class="ex">';
     h += '<div class="ex-head"><div><div class="ex-name">Cindy</div><div class="ex-sub">AMRAP · 20 minutes</div></div></div>';
     h += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px">';
-    h += '<div style="text-align:center;padding:14px 8px;background:var(--panel-2);border-radius:10px"><div style="font-size:26px;font-weight:800;color:var(--gold)">5</div><div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.3">Pull-ups</div></div>';
-    h += '<div style="text-align:center;padding:14px 8px;background:var(--panel-2);border-radius:10px"><div style="font-size:26px;font-weight:800;color:var(--gold)">10</div><div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.3">Push-ups</div></div>';
-    h += '<div style="text-align:center;padding:14px 8px;background:var(--panel-2);border-radius:10px"><div style="font-size:26px;font-weight:800;color:var(--gold)">15</div><div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.3">Air Squats</div></div>';
+    h += '<div style="text-align:center;padding:14px 8px;background:var(--panel-2);border-radius:10px"><div style="font-size:26px;font-weight:800;color:var(--gold)">5</div><div style="font-size:11px;color:var(--muted);margin-top:3px">Pull-ups</div></div>';
+    h += '<div style="text-align:center;padding:14px 8px;background:var(--panel-2);border-radius:10px"><div style="font-size:26px;font-weight:800;color:var(--gold)">10</div><div style="font-size:11px;color:var(--muted);margin-top:3px">Push-ups</div></div>';
+    h += '<div style="text-align:center;padding:14px 8px;background:var(--panel-2);border-radius:10px"><div style="font-size:26px;font-weight:800;color:var(--gold)">15</div><div style="font-size:11px;color:var(--muted);margin-top:3px">Air Squats</div></div>';
     h += '</div></div>';
-    h += '<div class="ex">';
-    h += '<div class="field"><label>Rounds completed</label>';
-    h += '<input inputmode="numeric" type="number" min="0" data-field="rounds" value="' + esc(d.rounds) + '" placeholder="e.g. 18" style="font-size:32px;font-weight:800;text-align:center;color:var(--gold);background:var(--panel-2);border:none;border-radius:10px;width:100%;padding:16px 0"></div>';
-    h += '<div class="field" style="margin-top:8px"><label>Notes</label><textarea data-field="notes" placeholder="Scaling used, how it felt…" rows="3">' + esc(d.notes) + '</textarea></div>';
+
+    // Countdown timer
+    h += '<div class="ex" style="text-align:center;padding-top:8px;padding-bottom:8px">';
+    h += '<div id="cindy-clock" style="font-size:80px;font-weight:800;letter-spacing:-3px;color:' + clockColor + ';line-height:1;margin-bottom:14px;font-variant-numeric:tabular-nums">' + clockTxt + '</div>';
+    h += '<div style="display:flex;gap:8px">';
+    h += '<button id="cindy-toggle-btn" class="prog-btn primary" data-act="cindy-toggle" style="flex:2;font-size:16px;font-weight:700;padding:13px">' + btnLabel + '</button>';
+    h += '<button class="prog-btn" data-act="cindy-reset" style="flex:1;font-size:15px;padding:13px">Reset</button>';
+    h += '</div></div>';
+
+    // Round counter + big button
+    h += '<div class="ex" style="text-align:center;padding-top:6px">';
+    h += '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Rounds</div>';
+    h += '<div id="cindy-rounds-count" style="font-size:100px;font-weight:800;line-height:1.05;color:var(--text);margin-bottom:18px;font-variant-numeric:tabular-nums">' + rounds + '</div>';
+    h += '<button id="cindy-round-btn" data-act="cindy-round" style="width:100%;background:linear-gradient(135deg,#EDBA4A 0%,#C98E1E 100%);color:#1A1305;border:none;border-radius:16px;font-size:22px;font-weight:800;padding:24px;cursor:pointer;font-family:inherit;letter-spacing:.01em;-webkit-tap-highlight-color:transparent;active:opacity:.85">✓ &nbsp; Complete Round</button>';
     h += '</div>';
+
+    // Notes
+    h += '<div class="ex"><div class="field"><label>Notes</label>';
+    h += '<textarea data-field="notes" placeholder="Scaling used, how it felt…" rows="2">' + esc(d.notes) + '</textarea></div></div>';
+
+    // Previous scores
     var past = S.sessions.filter(function (s) { return s.type === "cindy"; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
     if (past.length) {
+      var best = past.reduce(function (a, b) { return (+b.rounds || 0) > (+a.rounds || 0) ? b : a; }, past[0]);
       h += '<div class="group-label">Previous scores</div>';
       past.slice(0, 5).forEach(function (s) {
-        var best = past.reduce(function (a, b) { return (+b.rounds || 0) > (+a.rounds || 0) ? b : a; }, past[0]);
         var isBest = s.id === best.id;
-        h += '<div class="hist"><div class="hist-head"><div class="hist-w">Cindy &nbsp;·&nbsp; <b>' + esc(s.rounds || "?") + '</b> rounds' + (isBest ? ' <span style="color:var(--gold);font-size:10px;font-weight:800">★ PR</span>' : '') + '</div><div class="hist-d">' + esc(s.date) + '</div></div></div>';
+        h += '<div class="hist"><div class="hist-head"><div class="hist-w">Cindy &nbsp;·&nbsp; <b>' + esc(s.rounds || "?") + '</b> rounds' + (isBest ? ' <span style="color:var(--gold);font-size:10px;font-weight:800"> ★ PR</span>' : '') + '</div><div class="hist-d">' + esc(s.date) + '</div></div></div>';
       });
     }
     return h;
@@ -1295,6 +1319,51 @@
   }
 
   var tState = null;
+  var CT = { end: 0, running: false, iv: null };
+
+  function formatCindyClock() {
+    var rem = CT.end ? Math.max(0, Math.round((CT.end - Date.now()) / 1000)) : 1200;
+    var m = Math.floor(rem / 60), s = rem % 60;
+    return m + ":" + (s < 10 ? "0" : "") + s;
+  }
+  function startCindyTimer() {
+    if (CT.iv) clearInterval(CT.iv);
+    if (!CT.end || CT.end <= Date.now()) CT.end = Date.now() + 20 * 60 * 1000;
+    CT.running = true;
+    function tick() {
+      var rem = Math.max(0, Math.round((CT.end - Date.now()) / 1000));
+      var m = Math.floor(rem / 60), s = rem % 60;
+      var el = document.getElementById("cindy-clock");
+      if (el) el.textContent = m + ":" + (s < 10 ? "0" : "") + s;
+      var btn = document.getElementById("cindy-toggle-btn");
+      if (btn) { btn.textContent = "⏸ Pause"; btn.style.opacity = "1"; }
+      if (rem <= 0) {
+        pauseCindyTimer();
+        if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 300]);
+        toast("Time’s up — record your rounds!");
+        var clockEl = document.getElementById("cindy-clock");
+        if (clockEl) clockEl.style.color = "var(--muted)";
+      }
+    }
+    tick();
+    CT.iv = setInterval(tick, 250);
+  }
+  function pauseCindyTimer() {
+    if (CT.iv) clearInterval(CT.iv);
+    CT.iv = null;
+    CT.running = false;
+    var rem = CT.end ? Math.max(0, Math.round((CT.end - Date.now()) / 1000)) : 1200;
+    var btn = document.getElementById("cindy-toggle-btn");
+    if (btn) btn.textContent = rem > 0 && CT.end ? "▶ Resume" : "▶ Start 20 min";
+  }
+  function resetCindyTimer() {
+    pauseCindyTimer();
+    CT.end = 0;
+    var el = document.getElementById("cindy-clock");
+    if (el) { el.textContent = "20:00"; el.style.color = "var(--gold)"; }
+    var btn = document.getElementById("cindy-toggle-btn");
+    if (btn) btn.textContent = "▶ Start 20 min";
+  }
   function startTimer(secs, label) {
     stopTimer();
     var el = document.getElementById("timer");
@@ -1450,6 +1519,7 @@
     }
     var stamped = d.date;
     S.drafts[wid] = blankDraft(wid);
+    if (wid === "cindy") resetCindyTimer();
     saveDrafts();
     saveSessions().then(function (ok) {
       render();
@@ -1548,6 +1618,19 @@
         else if (a === "close") document.getElementById("modal").classList.remove("on");
         else if (a === "new-program") showNewProgramModal();
         else if (a === "t-skip") stopTimer();
+        else if (a === "cindy-toggle") { if (CT.running) pauseCindyTimer(); else startCindyTimer(); }
+        else if (a === "cindy-reset") resetCindyTimer();
+        else if (a === "cindy-round") {
+          var d2 = draft("cindy");
+          var nr = (parseInt(d2.rounds, 10) || 0) + 1;
+          d2.rounds = String(nr);
+          saveDrafts();
+          var ce = document.getElementById("cindy-rounds-count");
+          if (ce) ce.textContent = nr;
+          var rb = document.getElementById("cindy-round-btn");
+          if (rb) { rb.style.transform = "scale(0.96)"; setTimeout(function(){ if(rb) rb.style.transform = ""; }, 120); }
+          if (navigator.vibrate) navigator.vibrate(40);
+        }
       };
     });
   }
